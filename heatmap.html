@@ -1,0 +1,1162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.style.opacity = '1';</script>
+<script>
+// -- VELTRIQ THEME SYSTEM --
+// Runs before CSS loads to prevent flash
+(function() {
+  const t = localStorage.getItem('veltriq_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<title>VELTRIQ VRS - Recovery Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+<script src="data/vrs-visitors.js"></script>
+<script src="vrs-data.js"></script>
+<style>
+  :root {
+    --bg: #07111f;
+    --sidebar-bg: #060e1a;
+    --card-bg: #0c1828;
+    --card-border: rgba(26,90,225,0.18);
+    --text-primary: #e8edf3;
+    --text-secondary: #6b8aad;
+    --text-muted: #2d4a6a;
+    --blue: #1a5ae1;
+    --cyan: #11b4dc;
+    --sidebar-width: 220px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.12) 0%, transparent 45%),
+                #07111f;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+    font-size: 13px;
+    overflow: hidden;
+  }
+  
+  /* Light theme overrides */
+  [data-theme="light"] {
+    --bg: #f0f4f8;
+    --sidebar-bg: #e8edf5;
+    --card-bg: #ffffff;
+    --card-border: rgba(26,90,225,0.15);
+    --text-primary: #0f1e33;
+    --text-secondary: #4a6080;
+    --text-muted: #8fa3bb;
+    --blue: #1a5ae1;
+    --cyan: #0e9dc4;
+    --green: #16a34a;
+    --red: #dc2626;
+    --yellow: #d97706;
+  }
+  [data-theme="light"] body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.06) 0%, transparent 45%),
+                #f0f4f8;
+  }
+  [data-theme="light"]
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%);
+    border-right: 1px solid rgba(26,90,225,0.22);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  [data-theme="light"]
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    width: 100%;
+    text-align: left;
+  }
+  [data-theme="light"] table thead tr { border-bottom-color: rgba(26,90,225,0.1); }
+  [data-theme="light"] table thead th { color: #8fa3bb; }
+  [data-theme="light"] table tbody tr:hover { background: rgba(26,90,225,0.04); }
+  [data-theme="light"] .field input, [data-theme="light"] .select-styled,
+  [data-theme="light"] .date-input,
+  [data-theme="light"] .search-input, [data-theme="light"] .toggle-group {
+    background-color: #f5f8fc;
+    border-color: rgba(26,90,225,0.18);
+    color: #0f1e33;
+  }
+  [data-theme="light"] .toggle-btn { color: #4a6080; }
+  [data-theme="light"] .zip-row:hover { background: rgba(26,90,225,0.04); }
+  [data-theme="light"] .right-panel { background: rgba(240,244,248,0.8); border-left-color: rgba(26,90,225,0.12); }
+  [data-theme="light"] .profile-row { background: #f5f8fc; border-color: rgba(26,90,225,0.1); }
+  [data-theme="light"] .metro-item { background: #f5f8fc; border-color: rgba(26,90,225,0.1); }
+  [data-theme="light"] .info-row { border-bottom-color: rgba(26,90,225,0.06); }
+  [data-theme="light"] .overlay-pill { background: rgba(240,244,248,0.92); }
+  [data-theme="light"] .map-legend { background: rgba(240,244,248,0.92); }
+  [data-theme="light"] .leaflet-tile { filter: brightness(1.05) saturate(0.9); }
+  [data-theme="light"] .pagination { border-top-color: rgba(26,90,225,0.1); }
+  [data-theme="light"] .page-btn { border-color: rgba(26,90,225,0.15); color: #4a6080; background: #f5f8fc; }
+  [data-theme="light"] .log-body { background: #fafcff; }
+  [data-theme="light"]
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 18px 14px 0;
+    border-top: 1px solid var(--card-border);
+  }
+
+  /* -- SIDEBAR -- */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%);
+    border-right: 1px solid rgba(26,90,225,0.22);
+    display: flex; flex-direction: column;
+    padding: 20px 0;
+    position: fixed; top:0; left:0; bottom:0; z-index:100;
+  }
+  .logo {
+    padding: 0 18px 24px;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .nav-item:hover { background:rgba(26,90,225,0.1); color:var(--text-primary); }
+  .nav-item.active { background:rgba(26,90,225,0.18); color:#5b9fff; }
+  .nav-item svg { width: 18px; height: 18px; opacity: 0.86; flex-shrink: 0; }
+  
+  .sidebar-bottom { margin-top:auto; padding:18px 14px 0; border-top:1px solid var(--card-border); }
+
+  /* -- THEME TOGGLE BUTTON -- */
+  .theme-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: rgba(26,90,225,0.08);
+    border: 1px solid rgba(26,90,225,0.18);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .theme-btn:hover { background: rgba(26,90,225,0.14); color: var(--text-primary); }
+
+  .toggle-track {
+    width: 32px; height: 18px; border-radius: 9px;
+    background: rgba(26,90,225,0.3); position: relative;
+    transition: background 0.25s; flex-shrink: 0;
+  }
+  .toggle-track.on { background: #1a5ae1; }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; transition: transform 0.25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle-thumb.on { transform: translateX(14px); }
+
+  /* -- MAIN -- */
+  .main { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+  /* -- TOPBAR -- */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 24px 14px; flex-shrink:0;
+    border-bottom:1px solid var(--card-border);
+    background:rgba(6,14,26,0.6); backdrop-filter:blur(10px);
+  }
+  .page-title { font-size:20px; font-weight:700; letter-spacing:-0.5px; }
+  .page-sub { color:var(--text-secondary); font-size:12px; margin-top:2px; }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+
+  .toggle-group { display:flex; background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; overflow:hidden; }
+  .toggle-btn { padding:5px 13px; font-size:11px; font-weight:600; cursor:pointer; color:var(--text-secondary); border:none; background:transparent; font-family:inherit; transition:all 0.15s; }
+  .toggle-btn.active { background:var(--blue); color:#fff; border-radius:6px; margin:2px; }
+
+  .select-styled {
+    background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px;
+    color:var(--text-primary); font-family:inherit; font-size:11px; font-weight:500;
+    padding:6px 28px 6px 10px; appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a8d' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 8px center;
+  }
+  .date-input {
+    background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px;
+    color:var(--text-primary); font-family:inherit; font-size:11px; font-weight:500;
+    padding:6px 10px; min-width:145px; outline:none;
+  }
+  .date-input:focus { border-color:rgba(26,90,225,0.5); }
+
+  /* -- MAP LAYOUT -- */
+  .data-source { display:inline-flex; align-items:center; gap:8px; background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; color:var(--text-primary); font-size:12px; font-weight:700; padding:8px 12px; min-width:150px; justify-content:center; }
+  .data-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(34,197,94,0.14); animation:pulse 1.4s infinite; }
+  .map-layout { display:flex; flex:1; overflow:hidden; }
+
+  /* -- MAP CONTAINER -- */
+  .map-wrap { flex:1; position:relative; }
+  #map { width:100%; height:100%; }
+
+  /* Leaflet dark overrides */
+  .leaflet-container { background:#07111f !important; }
+  .leaflet-tile { filter:brightness(0.85) saturate(0.7); }
+
+  /* Custom popup */
+  .leaflet-popup-content-wrapper {
+    background:rgba(6,14,26,0.97) !important;
+    border:1px solid rgba(26,90,225,0.4) !important;
+    border-radius:10px !important;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5) !important;
+    color:var(--text-primary) !important;
+  }
+  .leaflet-popup-tip { background:rgba(6,14,26,0.97) !important; }
+  .leaflet-popup-close-button { color:#6b8aad !important; font-size:16px !important; }
+  .popup-zip { font-family:'DM Mono',monospace; font-size:14px; font-weight:700; margin-bottom:8px; }
+  .popup-row { display:flex; justify-content:space-between; gap:20px; font-size:12px; margin-bottom:4px; }
+  .popup-label { color:#6b8aad; }
+  .popup-val { font-weight:600; font-family:'DM Mono',monospace; }
+  .popup-type { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; margin-bottom:8px; letter-spacing:0.5px; }
+
+  /* Map overlay stats */
+  .map-overlay {
+    position:absolute; top:16px; left:16px; z-index:500;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .overlay-pill {
+    background:rgba(6,14,26,0.88); border:1px solid rgba(26,90,225,0.3);
+    border-radius:8px; padding:8px 12px; backdrop-filter:blur(8px);
+    display:flex; align-items:center; gap:8px;
+  }
+  .overlay-pill-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+  .overlay-pill-val { font-size:16px; font-weight:700; font-family:'DM Mono',monospace; }
+
+  /* Legend overlay */
+  .map-legend {
+    position:absolute; bottom:24px; left:16px; z-index:500;
+    background:rgba(6,14,26,0.88); border:1px solid rgba(26,90,225,0.3);
+    border-radius:8px; padding:10px 14px; backdrop-filter:blur(8px);
+  }
+  .legend-title { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:11px; color:var(--text-secondary); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .legend-grad { width:80px; height:6px; border-radius:3px; background:linear-gradient(90deg,#1a5ae133,#1a5ae1cc,#11b4dc); }
+
+  /* -- RIGHT PANEL -- */
+  .right-panel {
+    width:300px; flex-shrink:0;
+    background:rgba(6,14,26,0.7); backdrop-filter:blur(10px);
+    border-left:1px solid var(--card-border);
+    display:flex; flex-direction:column;
+    overflow-y:auto;
+  }
+  .panel-section { padding:16px 16px 12px; border-bottom:1px solid var(--card-border); }
+  .panel-title { font-size:12px; font-weight:700; color:var(--text-primary); margin-bottom:2px; letter-spacing:0.2px; }
+  .panel-sub { font-size:10px; color:var(--text-muted); margin-bottom:12px; }
+
+  /* Stats */
+  .stat-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .mini-stat { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; padding:10px 12px; }
+  .mini-stat-label { font-size:9px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:4px; }
+  .mini-stat-val { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+
+  /* ZIP ranks */
+  .zip-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; animation:fadeUp 0.3s ease both; }
+  .zip-rank { font-size:10px; color:var(--text-muted); font-family:'DM Mono',monospace; width:14px; flex-shrink:0; }
+  .zip-code { font-size:12px; font-weight:700; font-family:'DM Mono',monospace; min-width:46px; }
+  .zip-city { font-size:11px; color:var(--text-secondary); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .zip-bar-wrap { width:50px; flex-shrink:0; }
+  .zip-bar-track { height:3px; background:rgba(255,255,255,0.05); border-radius:2px; }
+  .zip-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
+  .zip-count { font-size:11px; font-family:'DM Mono',monospace; font-weight:700; min-width:20px; text-align:right; flex-shrink:0; }
+
+  /* Signal feed */
+  .feed-row {
+    display:flex; align-items:center; gap:8px; padding:7px 10px;
+    border-radius:7px; background:rgba(26,90,225,0.05);
+    border:1px solid rgba(26,90,225,0.1); margin-bottom:6px;
+    animation:fadeUp 0.3s ease both;
+  }
+
+  /* Profile panel */
+  .profile-row {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:8px 10px; border-radius:8px;
+    background:rgba(6,14,26,0.4); border:1px solid rgba(26,90,225,0.1);
+  }
+  .profile-icon {
+    width:28px; height:28px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  .profile-label { font-size:9px; font-weight:600; color:#2d4a6a; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+  .profile-val { font-size:12px; font-weight:600; color:#e8edf3; word-break:break-all; }
+  .profile-val a { color:inherit; text-decoration:none; }
+  .profile-val a:hover { text-decoration:underline; }
+  .feed-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .feed-zip { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; min-width:42px; }
+  .feed-type { font-size:10px; font-weight:600; min-width:48px; }
+  .feed-city { font-size:11px; color:var(--text-secondary); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .feed-time { font-size:10px; color:var(--text-muted); font-family:'DM Mono',monospace; flex-shrink:0; }
+
+  /* Split bar */
+  .split-bar { height:8px; border-radius:4px; overflow:hidden; display:flex; margin:8px 0; }
+  .split-bar-r { background:#1a5ae1; height:100%; transition:width 0.5s; }
+  .split-bar-p { background:#11b4dc; height:100%; transition:width 0.5s; }
+  .split-labels { display:flex; justify-content:space-between; }
+  .split-label { font-size:11px; display:flex; align-items:center; gap:5px; }
+  .split-label-dot { width:8px; height:8px; border-radius:50%; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .map-wrap:after { content:""; position:absolute; inset:0; pointer-events:none; box-shadow: inset 0 0 90px rgba(6,14,26,0.42); z-index: 450; }
+  .overlay-pill, .map-legend, .right-panel, #profilePanel { box-shadow: 0 18px 50px rgba(0,0,0,0.22); }
+  .feed-row, .zip-row, .mini-stat, .data-source, .toggle-btn { transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+  .feed-row:hover, .zip-row:hover, .mini-stat:hover, .data-source:hover { transform: translateX(3px); border-color: rgba(91,159,255,0.38); background: rgba(26,90,225,0.09); }
+  .map-focus-card { position:absolute; top:16px; right:16px; z-index:500; border:1px solid rgba(91,159,255,.28); border-radius:10px; padding:10px 12px; background:rgba(6,14,26,.88); backdrop-filter:blur(10px); min-width:180px; }
+  .map-focus-card span { display:block; font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.7px; font-weight:800; }
+  .map-focus-card strong { display:block; margin-top:4px; font-size:16px; }
+
+  @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 4px rgba(34,197,94,0.14)} 50%{opacity:.72;box-shadow:0 0 0 7px rgba(34,197,94,0.05)} }
+</style>
+
+<style id="vrs-sidebar-reset">
+  :root { --sidebar-width: 220px !important; }
+  body { margin: 0 !important; }
+  .sidebar {
+    width: var(--sidebar-width) !important;
+    min-width: var(--sidebar-width) !important;
+    max-width: var(--sidebar-width) !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 0 !important;
+    overflow-y: auto !important;
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%) !important;
+    border-right: 1px solid rgba(26,90,225,0.22) !important;
+  }
+  .main {
+    margin-left: var(--sidebar-width) !important;
+  }
+  .sidebar .logo {
+    display: block !important;
+    padding: 0 18px 24px !important;
+    margin: 0 0 18px !important;
+    border-bottom: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+    text-align: center !important;
+  }
+  .sidebar .logo div:first-child {
+    display: block !important;
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .logo div:last-child {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-top: 3px !important;
+  }
+  .sidebar .nav-section {
+    display: block !important;
+    padding: 0 14px !important;
+    margin: 0 0 24px !important;
+  }
+  .sidebar .nav-label {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 0 10px 10px !important;
+    font-weight: 700 !important;
+  }
+  .sidebar .nav-item,
+  .sidebar button.nav-item,
+  .sidebar a.nav-item {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 11px 14px !important;
+    margin: 0 0 4px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+  .sidebar .nav-item:hover {
+    background: rgba(26,90,225,0.10) !important;
+    color: var(--text-primary, #e8edf3) !important;
+  }
+  .sidebar .nav-item.active {
+    background: rgba(26,90,225,0.18) !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .nav-item svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    opacity: 0.86 !important;
+    flex: 0 0 18px !important;
+  }
+  .sidebar .sidebar-bottom {
+    margin-top: auto !important;
+    padding: 18px 14px 0 !important;
+    border-top: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+  }
+  .sidebar .theme-btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    margin-top: 10px !important;
+    border-radius: 8px !important;
+    background: rgba(26,90,225,0.08) !important;
+    border: 1px solid rgba(26,90,225,0.18) !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+  .sidebar .toggle-track {
+    width: 32px !important;
+    height: 18px !important;
+    border-radius: 9px !important;
+    background: rgba(26,90,225,0.3) !important;
+    position: relative !important;
+    flex: 0 0 32px !important;
+  }
+  .sidebar .toggle-thumb {
+    position: absolute !important;
+    top: 2px !important;
+    left: 2px !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+  }
+</style>
+  <link rel="stylesheet" href="vrs-light-readability.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#5b9fff;">VELTRIQ</div>
+    <div style="font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;line-height:1.45;">Visitor Recovery System</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <button class="nav-item" onclick="location.href='dashboard.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      VRS Overview
+    </button>
+    <button class="nav-item" onclick="location.href='intent.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      Recovery Queue
+    </button>
+    <button class="nav-item active" onclick="location.href='heatmap.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      Recovery Map
+    </button>
+  </div>
+<div class="nav-section">
+  <div class="nav-label">Account</div>
+    <button class="nav-item" onclick="window.location.href='chat.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Support
+    </button><button class="nav-item" onclick="window.location.href='profile.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </button>
+</div>
+  
+  <div class="sidebar-bottom">
+    <button class="nav-item" onclick="handleSignOut()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign Out
+    </button>
+
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+      <span style="display:flex;align-items:center;gap:8px;">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span id="themeLabel">Dark Mode</span>
+      </span>
+      <div class="toggle-track" id="toggleTrack">
+        <div class="toggle-thumb" id="toggleThumb"></div>
+      </div>
+    </button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Recovery Map</div>
+      <div class="page-sub" id="hmSub">Recoverable visitor density</div>
+    </div>
+    <div class="topbar-right">
+	<div class="toggle-group" style="margin-right:10px;">
+        <button class="toggle-btn active" id="btn24h" onclick="setTime('24h', this)">24h</button>
+        <button class="toggle-btn" id="btn48h" onclick="setTime('48h', this)">48h</button>
+        <button class="toggle-btn" id="btnTimeAll" onclick="setTime('all', this)">All</button>
+		
+      </div>
+      <input type="date" class="date-input" id="dateFilter" title="Show a specific date" onchange="setDateFilter(this.value)">
+	  
+      <div class="toggle-group">
+	  
+        <button class="toggle-btn active" id="btnAll" onclick="filterLeads('all',this)">All</button>
+        <button class="toggle-btn" id="btnRepair" onclick="filterLeads('Identified',this)">Identified</button>
+        <button class="toggle-btn" id="btnReplace" onclick="filterLeads('Anonymous',this)">Anonymous</button>
+      </div>
+      <div class="toggle-group" style="margin-left:10px; margin-right:10px;">
+        <button class="toggle-btn active" onclick="toggleLayer('heat',this)" id="btnHeat">Heat</button>
+        <button class="toggle-btn active" onclick="toggleLayer('pins',this)" id="btnPins">Pins</button>
+      </div>
+      <div class="data-source" title="Map data is populated by the cleaned VRS visitor CSV">
+        <span class="data-dot"></span><span id="visitorsourceLabel">VRS Data</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-layout">
+    <div class="map-wrap">
+      <div id="map"></div>
+      
+      <div class="map-focus-card">
+        <span>Highest Activity ZIP</span>
+        <strong id="focusZip">-</strong>
+      </div>
+
+      <div class="map-overlay">
+        <div class="overlay-pill">
+          <div>
+            <div class="overlay-pill-label">Recovered Visitors</div>
+            <div class="overlay-pill-val" id="overlayTotal">-</div>
+          </div>
+        </div>
+        <div class="overlay-pill">
+          <div>
+            <div class="overlay-pill-label">Active ZIPs</div>
+            <div class="overlay-pill-val" id="overlayZips">-</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="map-legend">
+        <div class="legend-title">Legend</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#1a5ae1;box-shadow:0 0 5px #1a5ae188;"></span>Identified Visitor</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#11b4dc;box-shadow:0 0 5px #11b4dc88;"></span>Anonymous Visitor</div>
+        <div class="legend-item" style="margin-top:6px;">
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">Heat Intensity</div>
+            <div class="legend-grad"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin-top:2px;"><span>Low</span><span>High</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">Recovery Overview</div>
+        <div class="panel-sub" id="hmPanelSub"></div>
+        <div class="stat-grid-2">
+          <div class="mini-stat">
+            <div class="mini-stat-label">Identified</div>
+            <div class="mini-stat-val" style="color:#1a5ae1;" id="statRepair">-</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">Anonymous</div>
+            <div class="mini-stat-val" style="color:#11b4dc;" id="statReplace">-</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="split-bar">
+            <div class="split-bar-r" id="splitR" style="width:0%"></div>
+            <div class="split-bar-p" id="splitP" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <div class="panel-title">Top ZIP Zones</div>
+        <div id="zipRanks"></div>
+      </div>
+      
+      <div class="panel-section" style="flex:1; display:flex; flex-direction:column; overflow:hidden; border-bottom:none;">
+        <div class="panel-title">Live Recovery Feed</div>
+        <div id="feedList" style="overflow-y:auto; flex:1; margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="right-panel" id="profilePanel" style="border-left:1px solid var(--card-border); width:280px; background:var(--sidebar-bg);">
+      <div id="profileEmpty" style="padding:40px 20px; text-align:center; color:var(--text-muted); font-size:12px;">
+        Click a pin on the map to view visitor details
+      </div>
+      <div id="profileCard" style="display:none; padding:20px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+          <div id="profileAvatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;"></div>
+          <div style="flex:1; overflow:hidden;">
+            <div id="profileName" style="font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+            <div id="profileLocation" style="font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+          </div>
+        </div>
+        
+        <div id="profileBadge" style="margin-bottom:15px;"></div>
+        
+        
+        
+        <div class="profile-row" id="profilePhoneRow" style="margin-bottom:8px;">
+          <div class="profile-icon" style="background:rgba(34,197,94,0.15);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.28 2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.4a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div style="overflow:hidden;">
+            <div class="profile-label">Phone</div>
+            <div id="profilePhone" class="profile-val"></div>
+          </div>
+        </div>
+
+        <div class="profile-row" id="profileEmailRow" style="margin-bottom:8px;">
+          <div class="profile-icon" style="background:rgba(17,180,220,0.15);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#11b4dc" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div style="overflow:hidden;">
+            <div class="profile-label">Email</div>
+            <div id="profileEmail" class="profile-val"></div>
+          </div>
+        </div>
+
+        <div class="profile-row" id="profileAddressRow">
+          <div class="profile-icon" style="background:rgba(26,90,225,0.12);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b8aad" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div style="overflow:hidden;">
+            <div class="profile-label">Address</div>
+            <div id="profileAddress" class="profile-val"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ========================================
+// THEME - reads/writes data-theme on <html>
+// ========================================
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('veltriq_theme', theme);
+
+  const isDark = theme === 'dark';
+  const track  = document.getElementById('toggleTrack');
+  const thumb  = document.getElementById('toggleThumb');
+  const icon   = document.getElementById('themeIcon');
+  const label  = document.getElementById('themeLabel');
+
+  if (track && thumb && icon && label) {
+    if (isDark) {
+      track.classList.remove('on');
+      thumb.classList.remove('on');
+      icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      label.textContent = 'Dark Mode';
+    } else {
+      track.classList.add('on');
+      thumb.classList.add('on');
+      icon.innerHTML = `
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+      label.textContent = 'Light Mode';
+    }
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+});
+
+
+function handleSignOut() {
+  window.location.href = 'index.html';
+}
+
+// -- STATE --
+// -- STATE --
+let ALL_FETCHED_LEADS = [];
+let ALL_LEADS = [];
+	
+let currentMetro = 'all_visitors';
+let currentFilter = 'all';
+let currentTime = '24h';
+let currentDate = '';
+
+// Coordinates for the Map FlyTo animation
+
+
+// -- MAP INIT --
+const map = L.map('map', { center: [39.8283, -98.5795], zoom: 4, zoomControl: false, attributionControl: false });
+  L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, subdomains: 'abcd' }).addTo(map);
+
+let heatLayer = null;
+let pinsLayer = L.layerGroup().addTo(map);
+let showHeat = true;
+let showPins = true;
+
+// -- DATA LOADING --
+// -- DATA LOADING --
+// -- DATA LOADING --
+let ZIP_CACHE = JSON.parse(localStorage.getItem('veltriq_zip_cache') || '{}');
+// -- TIME SWITCH --
+function setTime(period, btn) {
+  document.querySelectorAll('#btn24h,#btn48h,#btnTimeAll').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTime = period;
+  currentDate = '';
+  const dateInput = document.getElementById('dateFilter');
+  if (dateInput) dateInput.value = '';
+  applyTimeFilter();
+}
+
+function setDateFilter(value) {
+  currentDate = value || '';
+  if (!currentDate) {
+    const firstBtn = document.getElementById('btn24h');
+    if (firstBtn) setTime('24h', firstBtn);
+    return;
+  }
+  currentTime = 'date';
+  document.querySelectorAll('#btn24h,#btn48h,#btnTimeAll').forEach(b => b.classList.remove('active'));
+  applyTimeFilter();
+}
+
+function easternDateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+// -- TIME FILTER LOGIC --
+function applyTimeFilter() {
+  if (currentDate) {
+    ALL_LEADS = ALL_FETCHED_LEADS.filter(r => easternDateKey(r.ingested_at) === currentDate);
+  } else if (currentTime === 'all') {
+    ALL_LEADS = [...ALL_FETCHED_LEADS];
+  } else {
+    const hours = currentTime === '24h' ? 24 : 48;
+    const cutoff = new Date(Date.now() - hours * 3600000);
+    ALL_LEADS = ALL_FETCHED_LEADS.filter(r => new Date(r.ingested_at) >= cutoff);
+  }
+  
+  const suffix = currentDate ? ' | ' + currentDate : '';
+  document.getElementById('hmSub').textContent = 'Recoverable visitor density | ' + ALL_LEADS.length + ' VRS visitors plotted' + suffix;
+  buildLayers(currentFilter);
+}
+
+function hasContactValue(value) {
+    const cleaned = String(value ?? "").trim().toLowerCase();
+    return cleaned !== "" && cleaned !== "null" && cleaned !== "undefined" && cleaned !== "nan";
+}
+
+function rangeHighValue(value) {
+    const text = String(value ?? "").toLowerCase();
+    if (!hasContactValue(text)) return 0;
+
+    if (text.includes("million") || text.includes("mm")) {
+        const nums = text.match(/\d+(?:\.\d+)?/g) || [];
+        return nums.length ? Math.max(...nums.map(Number)) * 1000000 : 1000000;
+    }
+
+    const nums = text.match(/\d[\d,]*/g) || [];
+    return nums.length ? Math.max(...nums.map(n => Number(n.replace(/,/g, "")))) : 0;
+}
+
+function incomePoints(value) {
+    const high = rangeHighValue(value);
+    if (high >= 200000) return 7;
+    if (high >= 150000) return 6;
+    if (high >= 100000) return 5;
+    if (high >= 75000) return 4;
+    if (high >= 45000) return 3;
+    if (high > 0) return 1;
+    return 0;
+}
+
+function netWorthPoints(value) {
+    const high = rangeHighValue(value);
+    if (high >= 1000000) return 7;
+    if (high >= 500000) return 5;
+    if (high >= 250000) return 4;
+    if (high >= 100000) return 3;
+    if (high > 0) return 1;
+    return 0;
+}
+
+function calculateIntentScore(row) {
+    const income = row.INCOME_RANGE || row.INCOME || row.ESTIMATED_HOUSEHOLD_INCOME;
+    const netWorth = row.NET_WORTH || row.ESTIMATED_NET_WORTH;
+    const phone = row.SKIPTRACE_WIRELESS_NUMBERS || row.phone;
+    const email = row.PERSONAL_VERIFIED_EMAIL || row.PERSONAL_VERIFIED_EMAILS || row.email;
+
+    const score =
+        75 +
+        incomePoints(income) +
+        netWorthPoints(netWorth) +
+        (hasContactValue(phone) ? 8 : 0) +
+        (hasContactValue(email) ? 2 : 0);
+
+    return Math.max(75, Math.min(score, 99));
+}
+
+async function loadData() {
+  document.getElementById('hmSub').textContent = 'Recoverable visitor density | Loading VRS visitors...';
+  const allFetched = await VRS.loadVisitors(null, currentMetro);
+  const uniqueZips = [...new Set(allFetched.map(r => r.PERSONAL_ZIP || r.zip).filter(Boolean))];
+  const missingZips = uniqueZips.filter(zip => {
+    const row = allFetched.find(r => String(r.zip || r.PERSONAL_ZIP) === String(zip));
+    const hasCoords = row && Number(row.lat || row.LAT || row.latitude) && Number(row.lon || row.LON || row.lng || row.longitude);
+    return !hasCoords && !ZIP_CACHE[zip];
+  });
+  if (missingZips.length > 0) {
+    document.getElementById('hmSub').textContent = 'Recoverable visitor density | Resolving ' + missingZips.length + ' ZIP zones...';
+    await Promise.all(missingZips.map(async (zip) => {
+      try {
+        const res = await fetch('https://api.zippopotam.us/us/' + zip);
+        if (res.ok) {
+          const data = await res.json();
+          ZIP_CACHE[zip] = { lat: parseFloat(data.places[0].latitude), lon: parseFloat(data.places[0].longitude) };
+        } else {
+          ZIP_CACHE[zip] = 'not_found';
+        }
+      } catch(e) {
+        ZIP_CACHE[zip] = 'not_found';
+      }
+    }));
+    localStorage.setItem('veltriq_zip_cache', JSON.stringify(ZIP_CACHE));
+  }
+  const mapLead = (r) => {
+    let lat = parseFloat(r.LAT || r.lat || r.latitude);
+    let lon = parseFloat(r.LON || r.lon || r.lng || r.longitude);
+    const zip = r.zip || r.PERSONAL_ZIP;
+    if (isNaN(lat) || isNaN(lon) || (lat === 0 && lon === 0)) {
+      if (ZIP_CACHE[zip] && ZIP_CACHE[zip] !== 'not_found') {
+        lat = ZIP_CACHE[zip].lat + (Math.random() - 0.5) * 0.015;
+        lon = ZIP_CACHE[zip].lon + (Math.random() - 0.5) * 0.015;
+      } else {
+        lat = 39.8283 + (Math.random() - 0.5) * 8;
+        lon = -98.5795 + (Math.random() - 0.5) * 12;
+      }
+    }
+    return {
+      id: r.id,
+      type: r.identified ? 'Identified' : 'Anonymous',
+      name: r.full_name || 'Unknown',
+      zip: zip || 'Unknown',
+      city: '',
+      state: r.state || '',
+      phone: r.phone || '',
+      email: r.email || '',
+      address: r.address || '',
+      source: r.source || 'VRS Data',
+      lat: lat,
+      lon: lon,
+      ingested_at: r.visited_at
+    };
+  };
+  ALL_FETCHED_LEADS = allFetched.map(mapLead);
+  document.getElementById('hmSub').textContent = 'Recoverable visitor density | ' + ALL_FETCHED_LEADS.length + ' VRS visitors plotted';
+  document.getElementById('hmPanelSub').textContent = 'VRS Data';
+  const sourceLabel = document.getElementById('visitorsourceLabel');
+  if (sourceLabel) sourceLabel.textContent = 'VRS Data';
+  if (ALL_FETCHED_LEADS.length && map) {
+    const bounds = L.latLngBounds(ALL_FETCHED_LEADS.map(d => [d.lat, d.lon]));
+    map.fitBounds(bounds.pad(0.25), { maxZoom: 10 });
+  }
+  applyTimeFilter();
+}
+function filterLeads(type, btn) {
+  document.querySelectorAll('#btnAll,#btnRepair,#btnReplace').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = type;
+  buildLayers(type);
+}
+
+function toggleLayer(type, btn) {
+  btn.classList.toggle('active');
+  if (type === 'heat') showHeat = btn.classList.contains('active');
+  else showPins = btn.classList.contains('active');
+  buildLayers(currentFilter);
+}
+
+function makeIcon(type) {
+  const color = type === 'Identified' ? '#1a5ae1' : '#11b4dc';
+  const shadow = type === 'Identified' ? '#1a5ae188' : '#11b4dc88';
+  return L.divIcon({
+    html: `<div style="width:10px;height:10px;border-radius:50%;background:${color}; border:1.5px solid rgba(255,255,255,0.5); box-shadow:0 0 6px ${shadow},0 0 12px ${shadow};"></div>`,
+    iconSize: [10,10], iconAnchor: [5,5], className: ''
+  });
+}
+
+function buildLayers(filter) {
+  const leads = filter === 'all' ? ALL_LEADS : ALL_LEADS.filter(d => d.type === filter);
+  
+  pinsLayer.clearLayers();
+  
+  const heatPoints = leads.map(d => [d.lat, d.lon, 0.6]);
+  if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+  
+  if (showHeat) {
+    heatLayer = L.heatLayer(heatPoints, { 
+        radius: 28, blur: 22, maxZoom: 12, 
+        gradient: { 0.0: 'rgba(26,90,225,0)', 0.3: 'rgba(26,90,225,0.4)', 0.6: 'rgba(17,180,220,0.7)', 0.8: 'rgba(17,180,220,0.9)', 1.0: '#ffffff' } 
+    });
+    map.addLayer(heatLayer);
+  }
+  
+  if (showPins) {
+    leads.forEach(d => {
+      if(!d.lat || !d.lon) return;
+      const marker = L.marker([d.lat, d.lon], {icon: makeIcon(d.type)});
+      marker.on('click', () => showIntentProfile(d));
+      pinsLayer.addLayer(marker);
+    });
+  }
+  
+  const zips = aggregateZips(leads);
+  document.getElementById('overlayTotal').textContent = leads.length.toLocaleString();
+  document.getElementById('overlayZips').textContent = zips.length;
+  updatePanel(leads, zips);
+}
+
+function aggregateZips(leads) {
+  const m = {};
+  leads.forEach(d => {
+    if (!d.zip) return;
+    if (!m[d.zip]) m[d.zip] = {zip:d.zip, city:d.city, repair:0, replace:0, total:0};
+    if (d.type === 'Identified') m[d.zip].repair++; else m[d.zip].replace++;
+    m[d.zip].total++;
+  });
+  return Object.values(m).sort((a,b)=>b.total-a.total);
+}
+
+function updatePanel(leads, zips) {
+  const repair = leads.filter(d=>d.type==='Identified').length;
+  const replace = leads.filter(d=>d.type==='Anonymous').length;
+  const total = leads.length;
+  
+  document.getElementById('statRepair').textContent = repair;
+  document.getElementById('statReplace').textContent = replace;
+  
+  const rPct = total ? (repair/total*100).toFixed(1) : 0;
+  const pPct = total ? (replace/total*100).toFixed(1) : 0;
+  
+  document.getElementById('splitR').style.width = rPct + '%';
+  document.getElementById('splitP').style.width = pPct + '%';
+  
+  renderZipRanks(zips);
+  renderFeed(leads);
+}
+
+function renderZipRanks(zips) {
+  const container = document.getElementById('zipRanks');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  const topZips = zips.slice(0, 10);
+  if (topZips.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:10px 0;">No active ZIPs found</div>';
+      return;
+  }
+  
+  const max = Math.max(...topZips.map(z=>z.total), 1);
+  topZips.forEach((z, i) => {
+    const color = z.repair >= z.replace ? '#1a5ae1' : '#11b4dc';
+    container.innerHTML += `
+      <div class="zip-row">
+        <span class="zip-rank">${i+1}</span>
+        <span class="zip-code">${z.zip}</span>
+        <span class="zip-city">${z.city}</span>
+        <div class="zip-bar-wrap"><div class="zip-bar-track"><div class="zip-bar-fill" style="width:${Math.round(z.total/max*100)}%;background:${color};"></div></div></div>
+        <span class="zip-count" style="color:${color}">${z.total}</span>
+      </div>`;
+  });
+}
+
+function renderFeed(leads) {
+  const container = document.getElementById('feedList');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  const sorted = [...leads].sort((a,b) => new Date(b.ingested_at) - new Date(a.ingested_at)).slice(0, 15);
+  if(sorted.length === 0){
+      container.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:10px 0;">No visitors found</div>';
+      return;
+  }
+  
+  sorted.forEach(d => {
+    const color = d.type === 'Identified' ? '#1a5ae1' : '#11b4dc';
+    const encodedData = encodeURIComponent(JSON.stringify(d));
+    container.innerHTML += `
+      <div class="feed-row" style="border-left: 2px solid ${color}; cursor: pointer;" onclick="showIntentProfileEncoded('${encodedData}')">
+        <div class="feed-dot" style="background:${color}"></div>
+        <div class="feed-zip">${d.zip}</div>
+        <div class="feed-type" style="color:${color}">${d.type}</div>
+        <div class="feed-city">${d.city}</div>
+        <div class="feed-time">now</div>
+      </div>`;
+  });
+}
+
+function showIntentProfileEncoded(encoded) {
+  showIntentProfile(JSON.parse(decodeURIComponent(encoded)));
+}
+
+// -- REVEAL LOGIC FOR HEATMAP --
+function cleanMapsAddress(value) {
+  let address = String(value || '').trim();
+
+  try {
+    address = decodeURIComponent(address);
+  } catch (_) {
+    // Keep the original value if it was not URI-encoded.
+  }
+
+  return address
+    .replace(/^\s*\?q=\$?/i, '')
+    .replace(/^\s*q=\$?/i, '')
+    .replace(/^\s*\$+/, '')
+    .trim();
+}
+
+function showIntentProfile(d) {
+  document.getElementById('profileEmpty').style.display = 'none';
+  document.getElementById('profileCard').style.display = 'block';
+  
+  const color = d.type === 'Identified' ? '#1a5ae1' : '#11b4dc';
+  const initials = (d.name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  
+  const av = document.getElementById('profileAvatar');
+  av.textContent = initials;
+  av.style.background = color + '22';
+  av.style.border = `1.5px solid ${color}55`;
+  av.style.color = color;
+  
+  document.getElementById('profileName').textContent = d.name || 'Unknown';
+  document.getElementById('profileBadge').innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;background:${color}22;color:${color};border:1px solid ${color}44;">${d.type}</span>`;
+  document.getElementById('profileLocation').textContent = [d.zip, d.state].filter(Boolean).join(' - ') || '-';
+
+  if (d.phone) {
+    document.getElementById('profilePhoneRow').style.display = 'flex';
+    document.getElementById('profilePhone').innerHTML = `<a href="tel:${d.phone}" style="color:var(--text-primary);">${d.phone}</a>`;
+    document.getElementById('profilePhone').style.filter = 'none';
+  } else {
+    document.getElementById('profilePhoneRow').style.display = 'none';
+  }
+  
+  if (d.email) {
+    document.getElementById('profileEmailRow').style.display = 'flex';
+    document.getElementById('profileEmail').innerHTML = `<a href="mailto:${d.email}" style="color:var(--text-primary); word-break: break-all;">${d.email}</a>`;
+    document.getElementById('profileEmail').style.filter = 'none';
+  } else {
+    document.getElementById('profileEmailRow').style.display = 'none';
+  }
+  
+  if (d.address) {
+    document.getElementById('profileAddressRow').style.display = 'flex';
+    const address = cleanMapsAddress(d.address);
+    const destination = [address, d.state, d.zip].filter(Boolean).join(', ');
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+    document.getElementById('profileAddress').innerHTML = `<a href="${mapsUrl}" target="_blank" style="color:var(--text-secondary);text-decoration:none;border-bottom:1px dashed var(--text-muted);">${address}</a>`;
+    document.getElementById('profileAddress').style.filter = 'none';
+  } else {
+    document.getElementById('profileAddressRow').style.display = 'none';
+  }
+}
+
+window.addEventListener('load', loadData);
+</script>
+</body>
+</html>
+

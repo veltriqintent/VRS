@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.style.opacity='1';</script>
+<script>(function(){const t=localStorage.getItem('veltriq_theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/favicon.png"><title>VELTRIQ - Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07111f;--sidebar-bg:#060e1a;--card-bg:#0c1828;--card-border:rgba(26,90,225,.18);--text-primary:#e8edf3;--text-secondary:#6b8aad;--text-muted:#2d4a6a;--blue:#1a5ae1;--cyan:#11b4dc;--green:#22c55e;--red:#ef4444;--sidebar-width:220px;}
+  *{margin:0;padding:0;box-sizing:border-box;} body{background:radial-gradient(ellipse at 20% 0%,rgba(26,90,225,.15) 0%,transparent 55%),#07111f;font-family:'DM Sans',sans-serif;color:var(--text-primary);display:flex;min-height:100vh;font-size:13px;} [data-theme="light"]{--bg:#f0f4f8;--sidebar-bg:#e8edf5;--card-bg:#fff;--card-border:rgba(26,90,225,.15);--text-primary:#0f1e33;--text-secondary:#4a6080;--text-muted:#8fa3bb;} [data-theme="light"] body{background:#f0f4f8;} [data-theme="light"] .sidebar{background:linear-gradient(180deg,rgba(26,90,225,.06) 0%,rgba(232,237,245,.98) 30%);border-right-color:rgba(26,90,225,.15);} [data-theme="light"] .nav-item{color:#4a6080;} [data-theme="light"] .profile-card,[data-theme="light"] .setting-card{background:#fff;border-color:rgba(26,90,225,.12);}
+
+  .sidebar { width:var(--sidebar-width); background:linear-gradient(180deg,rgba(26,90,225,0.08) 0%,rgba(6,14,26,0.98) 30%); border-right:1px solid rgba(26,90,225,0.22); display:flex; flex-direction:column; padding:20px 0; position:fixed; top:0; left:0; bottom:0; z-index:100; overflow-y:auto; }
+  .logo { padding:0 18px 24px; border-bottom:1px solid var(--card-border); margin-bottom:18px; text-align:center; }
+  .nav-section { padding:0 14px; margin-bottom:24px; }
+  .nav-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; padding:0 10px 10px; font-weight:700; }
+  .nav-item { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:8px; color:var(--text-secondary); cursor:pointer; transition:all 0.15s; font-size:14px; font-weight:600; margin-bottom:4px; text-decoration:none; border:none; background:transparent; font-family:inherit; width:100%; text-align:left; }
+  .nav-item:hover { background:rgba(26,90,225,0.1); color:var(--text-primary); }
+  .nav-item.active { background:rgba(26,90,225,0.18); color:#5b9fff; }
+  .nav-item svg { width:18px; height:18px; opacity:0.86; flex-shrink:0; }
+  .sidebar-bottom { margin-top:auto; padding:18px 14px 0; border-top:1px solid var(--card-border); }
+  .theme-btn { width:100%; display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:8px; margin-top:10px; background:rgba(26,90,225,0.08); border:1px solid rgba(26,90,225,0.18); color:var(--text-secondary); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.15s; text-align:left; }
+  .theme-btn:hover { background:rgba(26,90,225,0.14); color:var(--text-primary); }
+  .toggle-track { width:32px; height:18px; border-radius:9px; background:rgba(26,90,225,0.3); position:relative; transition:background .25s; flex-shrink:0; }
+  .toggle-track.on { background:#1a5ae1; }
+  .toggle-thumb { position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; transition:transform .25s; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+  .toggle-thumb.on { transform:translateX(14px); }
+
+  .main{margin-left:var(--sidebar-width);flex:1;padding:32px;min-width:0;} .page-title{font-size:24px;font-weight:800;letter-spacing:-.5px;} .page-sub{color:var(--text-secondary);font-size:13px;margin-top:4px;margin-bottom:24px;} .profile-grid{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:18px;} .profile-card,.setting-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 16px 42px rgba(0,0,0,.16);} .profile-card{padding:24px;} .avatar{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,rgba(26,90,225,.32),rgba(17,180,220,.18));border:2px solid rgba(91,159,255,.35);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#5b9fff;margin-bottom:16px;} .profile-name{font-size:22px;font-weight:800;} .profile-email{color:var(--text-secondary);margin-top:4px;} .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;} .badge{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.5px;background:rgba(26,90,225,.12);border:1px solid rgba(26,90,225,.3);color:#5b9fff;} .setting-card{padding:18px;margin-bottom:14px;} .setting-card h3{font-size:15px;margin-bottom:8px;} .setting-card p{color:var(--text-secondary);line-height:1.5;font-size:13px;} .info-list{display:grid;gap:10px;margin-top:14px;} .info-row{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(26,90,225,.1);padding-top:10px;} .info-row span{color:var(--text-muted);font-size:11px;text-transform:uppercase;font-weight:800;letter-spacing:.6px;} .info-row strong{font-family:'DM Mono',monospace;font-size:12px;} @media(max-width:900px){.profile-grid{grid-template-columns:1fr;}}
+</style>
+<style id="vrs-sidebar-reset">
+  :root { --sidebar-width: 220px !important; }
+  body { margin: 0 !important; }
+  .sidebar {
+    width: var(--sidebar-width) !important;
+    min-width: var(--sidebar-width) !important;
+    max-width: var(--sidebar-width) !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 0 !important;
+    overflow-y: auto !important;
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%) !important;
+    border-right: 1px solid rgba(26,90,225,0.22) !important;
+  }
+  .main {
+    margin-left: var(--sidebar-width) !important;
+  }
+  .sidebar .logo {
+    display: block !important;
+    padding: 0 18px 24px !important;
+    margin: 0 0 18px !important;
+    border-bottom: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+    text-align: center !important;
+  }
+  .sidebar .logo div:first-child {
+    display: block !important;
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .logo div:last-child {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-top: 3px !important;
+  }
+  .sidebar .nav-section {
+    display: block !important;
+    padding: 0 14px !important;
+    margin: 0 0 24px !important;
+  }
+  .sidebar .nav-label {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 0 10px 10px !important;
+    font-weight: 700 !important;
+  }
+  .sidebar .nav-item,
+  .sidebar button.nav-item,
+  .sidebar a.nav-item {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 11px 14px !important;
+    margin: 0 0 4px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+  .sidebar .nav-item:hover {
+    background: rgba(26,90,225,0.10) !important;
+    color: var(--text-primary, #e8edf3) !important;
+  }
+  .sidebar .nav-item.active {
+    background: rgba(26,90,225,0.18) !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .nav-item svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    opacity: 0.86 !important;
+    flex: 0 0 18px !important;
+  }
+  .sidebar .sidebar-bottom {
+    margin-top: auto !important;
+    padding: 18px 14px 0 !important;
+    border-top: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+  }
+  .sidebar .theme-btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    margin-top: 10px !important;
+    border-radius: 8px !important;
+    background: rgba(26,90,225,0.08) !important;
+    border: 1px solid rgba(26,90,225,0.18) !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+  .sidebar .toggle-track {
+    width: 32px !important;
+    height: 18px !important;
+    border-radius: 9px !important;
+    background: rgba(26,90,225,0.3) !important;
+    position: relative !important;
+    flex: 0 0 32px !important;
+  }
+  .sidebar .toggle-thumb {
+    position: absolute !important;
+    top: 2px !important;
+    left: 2px !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+  }
+</style>
+  <link rel="stylesheet" href="vrs-light-readability.css">
+</head><body>
+
+<aside class="sidebar">
+  <div class="logo"><div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#5b9fff;">VELTRIQ</div><div style="font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;line-height:1.45;">Visitor Recovery System</div></div>
+  <div class="nav-section"><div class="nav-label">Main</div>
+    <button class="nav-item" onclick="location.href='dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>VRS Overview</button>
+    <button class="nav-item" onclick="location.href='intent.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Recovery Queue</button>
+    <button class="nav-item" onclick="location.href='heatmap.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>Recovery Map</button>
+  </div>
+  <div class="nav-section"><div class="nav-label">Account</div>
+    <button class="nav-item" onclick="location.href='chat.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Support</button>
+    <button class="nav-item active" onclick="location.href='profile.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</button>
+  </div>
+  <div class="sidebar-bottom"><button class="nav-item" onclick="location.href='index.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button><button class="theme-btn" onclick="toggleTheme()"><span style="display:flex;align-items:center;gap:8px;"><svg id="themeIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"></svg><span id="themeLabel"></span></span><div class="toggle-track" id="toggleTrack"><div class="toggle-thumb" id="toggleThumb"></div></div></button></div>
+</aside>
+<main class="main"><div class="page-title">Profile</div><div class="page-sub">Manage your VRS account preferences and access details.</div><div class="profile-grid"><section class="profile-card"><div class="avatar" id="avatarInitials">VR</div><div class="profile-name" id="profileName">VRS User</div><div class="profile-email" id="profileEmail">Local CSV mode</div><div class="badge-row"><span class="badge">Active</span><span class="badge">Visitor Recovery Access</span></div><div class="info-list"><div class="info-row"><span>Data Mode</span><strong>Local</strong></div><div class="info-row"><span>Source</span><strong>VRS CSV</strong></div><div class="info-row"><span>Status</span><strong>Ready</strong></div></div></section><section><div class="setting-card"><h3>Recovery Workspace</h3><p>The dashboard, queue, and map are using the scrubbed local VRS visitor file. When the webhook is ready, this profile can reflect live account access again.</p></div><div class="setting-card"><h3>Security</h3><p>Authentication is currently disconnected while local VRS data is being reviewed.</p></div></section></div></main>
+<script>function applyTheme(theme){document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('veltriq_theme',theme);const isDark=theme==='dark';document.getElementById('toggleTrack').classList.toggle('on',!isDark);document.getElementById('toggleThumb').classList.toggle('on',!isDark);document.getElementById('themeIcon').innerHTML=isDark?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>':'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';document.getElementById('themeLabel').textContent=isDark?'Dark Mode':'Light Mode';}function toggleTheme(){applyTheme((document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'light':'dark');}window.addEventListener('load',()=>applyTheme(localStorage.getItem('veltriq_theme')||'dark'));</script>
+</body></html>

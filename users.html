@@ -1,0 +1,671 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  const t = localStorage.getItem('veltriq_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<title>VELTRIQ - Users</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg:#07111f; --sidebar-bg:#060e1a; --card-bg:#0c1828;
+    --card-border:rgba(26,90,225,0.18); --text-primary:#e8edf3;
+    --text-secondary:#6b8aad; --text-muted:#2d4a6a;
+    --blue:#1a5ae1; --cyan:#11b4dc; --green:#22c55e;
+    --red:#ef4444; --yellow:#f5c518; --sidebar-width: 220px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.10) 0%, transparent 45%), #07111f;
+    font-family:'DM Sans', sans-serif; color:var(--text-primary);
+    display:flex; min-height:100vh; font-size:13px;
+  }
+  [data-theme="light"] {
+    --bg:#f0f4f8; --sidebar-bg:#e8edf5; --card-bg:#ffffff;
+    --card-border:rgba(26,90,225,0.15); --text-primary:#0f1e33;
+    --text-secondary:#4a6080; --text-muted:#8fa3bb;
+  }
+  [data-theme="light"] body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.06) 0%, transparent 45%), #f0f4f8;
+  }
+  [data-theme="light"]
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%);
+    border-right: 1px solid rgba(26,90,225,0.22);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  [data-theme="light"]
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    width: 100%;
+    text-align: left;
+  }
+  .logo {
+    padding: 0 18px 24px;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .nav-item:hover { background:rgba(26,90,225,0.1); color:var(--text-primary); }
+  .nav-item.active { background:rgba(26,90,225,0.18); color:#5b9fff; }
+  .nav-item svg { width: 18px; height: 18px; opacity: 0.86; flex-shrink: 0; }
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 18px 14px 0;
+    border-top: 1px solid var(--card-border);
+  }
+  .theme-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: rgba(26,90,225,0.08);
+    border: 1px solid rgba(26,90,225,0.18);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .theme-btn:hover { background:rgba(26,90,225,0.14); color:var(--text-primary); }
+  .toggle-track { width:32px; height:18px; border-radius:9px; background:rgba(26,90,225,0.3); position:relative; transition:background 0.25s; flex-shrink:0; }
+  .toggle-track.on { background:#1a5ae1; }
+  .toggle-thumb { position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; transition:transform 0.25s; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+  .toggle-thumb.on { transform:translateX(14px); }
+  .main { margin-left:var(--sidebar-width); flex:1; padding:32px 32px 60px; min-width:0; }
+  .topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:22px; }
+  .page-title { font-size:24px; font-weight:700; letter-spacing:-0.5px; }
+  .page-sub { color:var(--text-secondary); font-size:13px; margin-top:3px; }
+  .summary { display:grid; grid-template-columns:repeat(3, minmax(140px, 1fr)); gap:12px; margin-bottom:16px; }
+  .stat-card {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:8px; padding:16px;
+  }
+  .stat-label { font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; }
+  .stat-value { font-size:28px; font-weight:700; letter-spacing:-0.8px; margin-top:8px; }
+  .toolbar {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:8px; padding:14px; display:grid;
+    grid-template-columns:minmax(220px, 1fr) 180px auto; gap:10px; margin-bottom:16px;
+  }
+  .toolbar input, .toolbar select {
+    width:100%; background:rgba(6,14,26,0.6); border:1px solid rgba(26,90,225,0.2);
+    border-radius:8px; color:var(--text-primary); font-family:inherit; font-size:13px;
+    padding:9px 12px; outline:none;
+  }
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    padding:9px 14px; border-radius:8px; font-size:13px; font-weight:700;
+    cursor:pointer; font-family:inherit; border:none; background:linear-gradient(135deg,var(--blue),#1048b8); color:#fff;
+  }
+  .btn svg { width:15px; height:15px; }
+  .table-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; overflow:hidden; }
+  .table-head, .user-row {
+    display:grid; grid-template-columns:minmax(250px, 1.2fr) minmax(230px, 1.6fr) 160px;
+    gap:14px; align-items:center;
+  }
+  .table-head {
+    padding:12px 16px; border-bottom:1px solid var(--card-border);
+    color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase;
+  }
+  .user-row { padding:15px 16px; border-bottom:1px solid rgba(26,90,225,0.08); }
+  .user-row:last-child { border-bottom:none; }
+  .person { display:flex; align-items:center; gap:12px; min-width:0; }
+  .avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg, rgba(26,90,225,0.3), rgba(17,180,220,0.18));
+    border:1px solid rgba(26,90,225,0.35);
+    display:flex; align-items:center; justify-content:center; color:#5b9fff; font-weight:800; flex-shrink:0;
+  }
+  .name { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .email { color:var(--text-secondary); font-family:'DM Mono', monospace; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .company { color:var(--text-muted); font-size:11px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .metro-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  .pill {
+    display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px;
+    background:rgba(26,90,225,0.12); border:1px solid rgba(26,90,225,0.28);
+    color:#8db8ff; font-size:11px; font-weight:700;
+  }
+  .pill.empty { color:var(--text-muted); border-color:rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); }
+  .type-badge {
+    display:inline-flex; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.45px;
+    background:rgba(17,180,220,0.12); border:1px solid rgba(17,180,220,0.28); color:var(--cyan);
+  }
+  .date-cell { color:var(--text-secondary); font-size:12px; }
+  .date-cell.muted { color:var(--text-muted); }
+  .status {
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800;
+    padding:4px 8px; border-radius:999px; width:max-content;
+  }
+  .status.active { color:var(--green); background:rgba(34,197,94,0.11); border:1px solid rgba(34,197,94,0.28); }
+  .status.pending { color:var(--yellow); background:rgba(245,197,24,0.11); border:1px solid rgba(245,197,24,0.28); }
+  .status.blocked { color:var(--red); background:rgba(239,68,68,0.11); border:1px solid rgba(239,68,68,0.28); }
+  .empty-state { color:var(--text-muted); text-align:center; padding:34px 16px; font-size:13px; }
+  .error-box {
+    color:var(--red); background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3);
+    border-radius:8px; padding:14px 16px; margin-bottom:16px; display:none;
+  }
+  @media (max-width:1100px) {
+    .summary { grid-template-columns:repeat(2, minmax(140px, 1fr)); }
+    .toolbar { grid-template-columns:1fr 1fr; }
+    .table-card { overflow-x:auto; }
+    .table-head, .user-row { min-width:760px; }
+  }
+  @media (max-width:720px) {
+    .sidebar { position:static; width:100%; min-height:auto; }
+    body { display:block; }
+    .main { margin-left:0; padding:22px 16px 40px; }
+    .toolbar, .summary { grid-template-columns:1fr; }
+    .topbar { flex-direction:column; }
+  }
+</style>
+
+<style id="vrs-sidebar-reset">
+  :root { --sidebar-width: 220px !important; }
+  body { margin: 0 !important; }
+  .sidebar {
+    width: var(--sidebar-width) !important;
+    min-width: var(--sidebar-width) !important;
+    max-width: var(--sidebar-width) !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 0 !important;
+    overflow-y: auto !important;
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%) !important;
+    border-right: 1px solid rgba(26,90,225,0.22) !important;
+  }
+  .main {
+    margin-left: var(--sidebar-width) !important;
+  }
+  .sidebar .logo {
+    display: block !important;
+    padding: 0 18px 24px !important;
+    margin: 0 0 18px !important;
+    border-bottom: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+    text-align: center !important;
+  }
+  .sidebar .logo div:first-child {
+    display: block !important;
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .logo div:last-child {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-top: 3px !important;
+  }
+  .sidebar .nav-section {
+    display: block !important;
+    padding: 0 14px !important;
+    margin: 0 0 24px !important;
+  }
+  .sidebar .nav-label {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 0 10px 10px !important;
+    font-weight: 700 !important;
+  }
+  .sidebar .nav-item,
+  .sidebar button.nav-item,
+  .sidebar a.nav-item {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 11px 14px !important;
+    margin: 0 0 4px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+  .sidebar .nav-item:hover {
+    background: rgba(26,90,225,0.10) !important;
+    color: var(--text-primary, #e8edf3) !important;
+  }
+  .sidebar .nav-item.active {
+    background: rgba(26,90,225,0.18) !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .nav-item svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    opacity: 0.86 !important;
+    flex: 0 0 18px !important;
+  }
+  .sidebar .sidebar-bottom {
+    margin-top: auto !important;
+    padding: 18px 14px 0 !important;
+    border-top: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+  }
+  .sidebar .theme-btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    margin-top: 10px !important;
+    border-radius: 8px !important;
+    background: rgba(26,90,225,0.08) !important;
+    border: 1px solid rgba(26,90,225,0.18) !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+  .sidebar .toggle-track {
+    width: 32px !important;
+    height: 18px !important;
+    border-radius: 9px !important;
+    background: rgba(26,90,225,0.3) !important;
+    position: relative !important;
+    flex: 0 0 32px !important;
+  }
+  .sidebar .toggle-thumb {
+    position: absolute !important;
+    top: 2px !important;
+    left: 2px !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+  }
+</style>
+  <link rel="stylesheet" href="vrs-light-readability.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#5b9fff;">VELTRIQ</div>
+    <div style="font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;line-height:1.45;">Visitor Recovery System</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <button class="nav-item" onclick="window.location.href='dashboard.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="window.location.href='intent.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      Visitors
+    </button>
+    <button class="nav-item" onclick="window.location.href='heatmap.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      Heat Map
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Admin</div>
+    <button class="nav-item active" onclick="window.location.href='users.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Users
+    </button>
+    <button class="nav-item" onclick="window.location.href='onboarding.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      Onboarding
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <button class="nav-item" onclick="window.location.href='chat.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Support
+    </button><button class="nav-item" onclick="window.location.href='profile.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <button class="nav-item" onclick="signOut()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+      <span style="display:flex;align-items:center;gap:8px;">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"></svg>
+        <span id="themeLabel"></span>
+      </span>
+      <div class="toggle-track" id="toggleTrack"><div class="toggle-thumb" id="toggleThumb"></div></div>
+    </button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Registered Users</div>
+      <div class="page-sub">All Supabase Auth users and the metro access attached to their accounts</div>
+    </div>
+    <button class="btn" onclick="loadUsers()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 8h5V3"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="summary">
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value" id="statUsers">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Subscribed Users</div>
+      <div class="stat-value" id="statSubscribed">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Metro Seats</div>
+      <div class="stat-value" id="statSeats">-</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input id="searchInput" type="search" placeholder="Search name, email, company, or metro" oninput="renderUsers()">
+    <select id="metroFilter" onchange="renderUsers()">
+      <option value="">All metros</option>
+    </select>
+    <button class="btn" onclick="exportCsv()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <div>User</div>
+      <div>Subscribed Metros</div>
+      <div>Data Type</div>
+    </div>
+    <div id="usersTable">
+      <div class="empty-state">Loading users...</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const SUPABASE_URL  = 'https://nybraioenihbdqdphpad.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YnJhaW9lbmloYmRxZHBocGFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDY0MDgsImV4cCI6MjA5MDAyMjQwOH0.cca9uTB3hp7Z8CK3lheRsbUyJkuUrSnkIUzpyM6gCQM';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let allUsers = [];
+let filteredUsers = [];
+
+(async () => {
+  document.documentElement.style.opacity = '0';
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.href = 'index.html';
+    return;
+  }
+  document.documentElement.style.opacity = '1';
+  applyTheme(localStorage.getItem('veltriq_theme') || 'dark');
+  loadUsers();
+})();
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+  }[ch]));
+}
+
+function formatDate(value, options = {}) {
+  if (!value) return 'N/A';
+  const date = new Date(String(value).includes('T') ? value : `${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+  return date.toLocaleDateString('en-US', {
+    month: options.short ? 'short' : 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+function initialsFor(user) {
+  const source = user.full_name || user.email || '?';
+  return source.split(/[ @._-]/).filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || '?';
+}
+
+function metroLabel(metro) {
+  if (!metro) return 'Unknown';
+  if (typeof metro === 'string') return metro;
+  return metro.label || [metro.name, metro.state].filter(Boolean).join(', ') || metro.key || 'Unknown';
+}
+
+function dataTypeLabel(type) {
+  if (type) return 'Visitor Recovery Access';
+  return 'Not Set';
+}
+
+async function loadUsers() {
+  const table = document.getElementById('usersTable');
+  const errorBox = document.getElementById('errorBox');
+  table.innerHTML = '<div class="empty-state">Loading users...</div>';
+  errorBox.style.display = 'none';
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  try {
+    const endpoint = `${window.location.origin}/api/users`;
+    const response = await fetch(endpoint, {
+      headers: { Authorization: `Bearer ${session.access_token}` }
+    });
+
+    const responseText = await response.text();
+    let body;
+    try {
+      body = responseText ? JSON.parse(responseText) : {};
+    } catch (parseError) {
+      const preview = responseText.replace(/\s+/g, ' ').trim().slice(0, 120);
+      throw new Error(`Expected JSON from ${endpoint}, but received HTML/text instead. Make sure this site is deployed with the /api/users serverless function. Response preview: ${preview || 'empty response'}`);
+    }
+
+    if (!response.ok) throw new Error(body.error || body.msg || body.message || 'Unable to load users');
+
+    allUsers = (body.users || [])
+      .filter(user => Array.isArray(user.metro_access) && user.metro_access.length > 0)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    populateMetroFilter();
+    renderStats();
+    renderUsers();
+  } catch (error) {
+    table.innerHTML = '<div class="empty-state">No users loaded</div>';
+    errorBox.textContent = error.message;
+    errorBox.style.display = 'block';
+  }
+}
+
+function populateMetroFilter() {
+  const select = document.getElementById('metroFilter');
+  const current = select.value;
+  const labels = new Set();
+  allUsers.forEach(user => user.metro_access.forEach(metro => labels.add(metroLabel(metro))));
+  select.innerHTML = '<option value="">All metros</option>' +
+    [...labels].sort().map(label => `<option value="${escapeHtml(label)}">${escapeHtml(label)}</option>`).join('');
+  if ([...select.options].some(option => option.value === current)) select.value = current;
+}
+
+function renderStats() {
+  const seats = allUsers.reduce((sum, user) => sum + user.metro_access.length, 0);
+  document.getElementById('statUsers').textContent = allUsers.length.toLocaleString();
+  document.getElementById('statSubscribed').textContent = allUsers.length.toLocaleString();
+  document.getElementById('statSeats').textContent = seats.toLocaleString();
+}
+
+function renderUsers() {
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const metroFilter = document.getElementById('metroFilter').value;
+
+  filteredUsers = allUsers.filter(user => {
+    const metros = user.metro_access.map(metroLabel);
+    const text = [
+      user.full_name, user.email, user.company, user.id, user.data_type,
+      ...metros
+    ].join(' ').toLowerCase();
+    return (!search || text.includes(search)) &&
+      (!metroFilter || metros.includes(metroFilter));
+  });
+
+  const table = document.getElementById('usersTable');
+  if (!filteredUsers.length) {
+    table.innerHTML = '<div class="empty-state">No users match the current filters</div>';
+    return;
+  }
+
+  table.innerHTML = filteredUsers.map(user => {
+    const metros = user.metro_access.map(metro => `<span class="pill">${escapeHtml(metroLabel(metro))}</span>`).join('');
+    const name = user.full_name || 'Unnamed User';
+    const company = user.company ? `<div class="company">${escapeHtml(user.company)}</div>` : '';
+
+    return `
+      <div class="user-row">
+        <div class="person">
+          <div class="avatar">${escapeHtml(initialsFor(user))}</div>
+          <div style="min-width:0;">
+            <div class="name">${escapeHtml(name)}</div>
+            <div class="email">${escapeHtml(user.email || user.phone || user.id)}</div>
+            ${company}
+          </div>
+        </div>
+        <div class="metro-pills">${metros}</div>
+        <div><span class="type-badge">${escapeHtml(dataTypeLabel(user.data_type))}</span></div>
+      </div>`;
+  }).join('');
+}
+
+function exportCsv() {
+  const rows = [
+    ['Name', 'Email', 'Company', 'Metros', 'Data Type', 'Created At', 'Last Sign In']
+  ];
+  filteredUsers.forEach(user => {
+    rows.push([
+      user.full_name || '',
+      user.email || '',
+      user.company || '',
+      user.metro_access.map(metroLabel).join('; '),
+      dataTypeLabel(user.data_type),
+      user.created_at || '',
+      user.last_sign_in_at || ''
+    ]);
+  });
+  const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'veltriq-users.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('veltriq_theme', theme);
+  const isDark = theme === 'dark';
+  const track = document.getElementById('toggleTrack');
+  const thumb = document.getElementById('toggleThumb');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (isDark) {
+    track.classList.remove('on');
+    thumb.classList.remove('on');
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    label.textContent = 'Dark Mode';
+  } else {
+    track.classList.add('on');
+    thumb.classList.add('on');
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    label.textContent = 'Light Mode';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
+

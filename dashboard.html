@@ -1,0 +1,1148 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.style.opacity = '1';</script>
+<script>
+// ── VELTRIQ THEME SYSTEM ──
+(function() {
+  const t = localStorage.getItem('veltriq_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<title>VELTRIQ - Visitor Recovery System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07111f;
+    --sidebar-bg: #060e1a;
+    --card-bg: #0c1828;
+    --card-border: rgba(26,90,225,0.18);
+    --text-primary: #e8edf3;
+    --text-secondary: #6b8aad;
+    --text-muted: #2d4a6a;
+    --accent-blue: #1a5ae1;
+    --accent-cyan: #11b4dc;
+    --accent-purple: #a78bfa;
+    --accent-yellow: #f5c518;
+    --accent-green: #22c55e;
+    --accent-orange: #f97316;
+    --accent-red: #ef4444;
+    --sidebar-width: 220px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.12) 0%, transparent 45%),
+                #07111f;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── LIGHT THEME ── */
+  [data-theme="light"] {
+    --bg: #f0f4f8;
+    --sidebar-bg: #e8edf5;
+    --card-bg: #ffffff;
+    --card-border: rgba(26,90,225,0.15);
+    --text-primary: #0f1e33;
+    --text-secondary: #4a6080;
+    --text-muted: #8fa3bb;
+  }
+  [data-theme="light"] body {
+    background: radial-gradient(ellipse at 20% 0%, rgba(26,90,225,0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 10%, rgba(17,180,220,0.06) 0%, transparent 45%),
+                #f0f4f8;
+  }
+  [data-theme="light"]
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%);
+    border-right: 1px solid rgba(26,90,225,0.22);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  [data-theme="light"]
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    width: 100%;
+    text-align: left;
+  }
+  .logo {
+    padding: 0 18px 24px;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .nav-section { padding: 0 14px; margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 10px 10px;
+    font-weight: 700;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+    border-radius: 8px; color: var(--text-secondary); cursor: pointer;
+    transition: all 0.15s; font-size: 14px; font-weight: 600; margin-bottom: 4px;
+    text-decoration: none; border: none; background: transparent; font-family: inherit; width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: rgba(26,90,225,0.1); color: var(--text-primary); }
+  .nav-item.active { background: rgba(26,90,225,0.18); color: #5b9fff; }
+  .nav-item svg { width: 18px; height: 18px; opacity: 0.86; flex-shrink: 0; }
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 18px 14px 0;
+    border-top: 1px solid var(--card-border);
+  }
+
+  /* ── THEME TOGGLE BUTTON ── */
+  .theme-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: rgba(26,90,225,0.08);
+    border: 1px solid rgba(26,90,225,0.18);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .theme-btn:hover { background: rgba(26,90,225,0.14); color: var(--text-primary); }
+
+  .toggle-track {
+    width: 32px; height: 18px; border-radius: 9px;
+    background: rgba(26,90,225,0.3); position: relative;
+    transition: background 0.25s; flex-shrink: 0;
+  }
+  .toggle-track.on { background: #1a5ae1; }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; transition: transform 0.25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle-thumb.on { transform: translateX(14px); }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
+
+  .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+  .page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-sub { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
+  .topbar-controls { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+
+  .time-toggle {
+    display: flex; background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .time-btn {
+    padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--text-secondary); border: none; background: transparent;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .time-btn.active { background: var(--accent-blue); color: #fff; border-radius: 6px; margin: 2px; }
+
+  .data-source {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;
+    color: var(--text-primary); font-family: inherit; font-size: 12px; font-weight: 700;
+    padding: 7px 12px; min-width: 150px; justify-content: center;
+  }
+  .data-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green);
+    box-shadow: 0 0 0 4px rgba(34,197,94,0.14); animation: blink 1.4s infinite;
+  }
+  .date-input {
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;
+    color: var(--text-primary); font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 7px 10px; min-width: 150px; outline: none;
+  }
+  .date-input:focus { border-color: rgba(26,90,225,0.5); }
+
+  .exclusive-btn {
+    background: linear-gradient(135deg, #b45309, #d97706); color: #fff; border: none;
+    border-radius: 8px; padding: 7px 14px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; cursor: pointer; font-family: inherit;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .stat-header { display: flex; align-items: center; justify-content: space-between; }
+  .stat-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .stat-icon svg { width: 16px; height: 16px; }
+  .stat-value { font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+  .stat-value.green { color: var(--accent-green); font-size: 28px; }
+  .score-suffix { font-size: 16px; color: var(--text-muted); font-weight: 500; letter-spacing: 0; }
+  .trend-arrow { display: inline-flex; align-items: center; margin-left: 6px; }
+
+  /* ── CHART & ZIP CARDS ── */
+  .chart-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+  }
+  .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .chart-title { font-size: 15px; font-weight: 600; }
+  .chart-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .pulse-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(260px, 1fr);
+    gap: 28px;
+    align-items: center;
+  }
+  .pulse-rings {
+    display: grid;
+    grid-template-columns: repeat(2, 128px);
+    justify-content: center;
+    gap: 28px;
+  }
+  .pulse-ring {
+    width: 128px;
+    height: 128px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pulse-svg { width: 128px; height: 128px; display: block; }
+  .pulse-track { stroke: rgba(107,138,173,0.18); }
+  .pulse-value { fill: var(--text-primary); font-size: 18px; font-weight: 800; }
+  .pulse-label { fill: var(--text-secondary); font-size: 8px; font-weight: 700; letter-spacing: 0.25px; }
+  .pulse-panel-title {
+    font-size: 11px; color: var(--text-muted); font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .pulse-feed-title {
+    font-size: 11px; color: var(--text-muted); font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  @media (max-width: 900px) {
+    .pulse-layout { grid-template-columns: 1fr; gap: 20px; }
+    .pulse-rings { justify-content: start; }
+  }
+
+  .zip-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 20px 24px;
+  }
+  .zip-header { margin-bottom: 18px; }
+  .zip-title { font-size: 15px; font-weight: 600; }
+  .zip-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .zip-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .zip-rank { font-size: 11px; color: var(--text-muted); width: 14px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .zip-code { font-size: 13px; font-weight: 600; width: 52px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .bar-track { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; }
+  .bar-repair  { background: #1a5ae1; }
+  .bar-replace { background: #11b4dc; }
+  .zip-scores { display: flex; gap: 10px; flex-shrink: 0; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+  .score-r { color: var(--accent-red); }
+  .score-p { color: var(--text-secondary); }
+  .zip-legend { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+
+  @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .command-center {
+    position: relative; overflow: hidden; border: 1px solid rgba(91,159,255,0.22);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(26,90,225,0.18), rgba(17,180,220,0.08) 52%, rgba(34,197,94,0.07));
+    box-shadow: 0 18px 50px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .command-center:before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.07) 45%, transparent 70%);
+    transform: translateX(-100%); animation: sheen 7s ease-in-out infinite;
+  }
+  .command-grid { display: grid; grid-template-columns: minmax(260px,1.3fr) repeat(3,minmax(130px,0.7fr)); gap: 14px; align-items: center; position: relative; }
+  .command-eyebrow { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #8fb6ff; font-weight: 800; margin-bottom: 6px; }
+  .command-title { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .command-copy { color: var(--text-secondary); font-size: 12px; margin-top: 4px; max-width: 560px; }
+  .command-metric { background: rgba(6,14,26,0.34); border: 1px solid rgba(91,159,255,0.16); border-radius: 10px; padding: 12px 14px; }
+  .command-metric span { display:block; color: var(--text-muted); font-size: 9px; text-transform: uppercase; letter-spacing: .7px; font-weight: 800; }
+  .command-metric strong { display:block; margin-top: 5px; font-size: 22px; line-height: 1; }
+  .command-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .command-link { border:1px solid rgba(91,159,255,0.25); background: rgba(26,90,225,0.18); color:var(--text-primary); border-radius:8px; padding:8px 11px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .command-link:hover { transform: translateY(-1px); border-color: rgba(91,159,255,0.5); }
+  .stat-card, .chart-card, .zip-card, .mini-stat, .table-card { box-shadow: 0 14px 40px rgba(0,0,0,0.14); }
+  .stat-card { transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+  .stat-card:hover { transform: translateY(-3px); border-color: rgba(91,159,255,0.42); box-shadow: 0 20px 55px rgba(0,0,0,0.22); }
+  .data-source { box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.12); }
+  @keyframes sheen { 0%, 60% { transform: translateX(-110%); } 100% { transform: translateX(110%); } }
+  @media (max-width: 1050px) { .command-grid { grid-template-columns:1fr; } }
+
+</style>
+
+<style id="vrs-sidebar-reset">
+  :root { --sidebar-width: 220px !important; }
+  body { margin: 0 !important; }
+  .sidebar {
+    width: var(--sidebar-width) !important;
+    min-width: var(--sidebar-width) !important;
+    max-width: var(--sidebar-width) !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 0 !important;
+    overflow-y: auto !important;
+    background: linear-gradient(180deg, rgba(26,90,225,0.08) 0%, rgba(6,14,26,0.98) 30%) !important;
+    border-right: 1px solid rgba(26,90,225,0.22) !important;
+  }
+  .main {
+    margin-left: var(--sidebar-width) !important;
+  }
+  .sidebar .logo {
+    display: block !important;
+    padding: 0 18px 24px !important;
+    margin: 0 0 18px !important;
+    border-bottom: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+    text-align: center !important;
+  }
+  .sidebar .logo div:first-child {
+    display: block !important;
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .logo div:last-child {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-top: 3px !important;
+  }
+  .sidebar .nav-section {
+    display: block !important;
+    padding: 0 14px !important;
+    margin: 0 0 24px !important;
+  }
+  .sidebar .nav-label {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    color: var(--text-muted, #2d4a6a) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 0 10px 10px !important;
+    font-weight: 700 !important;
+  }
+  .sidebar .nav-item,
+  .sidebar button.nav-item,
+  .sidebar a.nav-item {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 11px 14px !important;
+    margin: 0 0 4px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+  .sidebar .nav-item:hover {
+    background: rgba(26,90,225,0.10) !important;
+    color: var(--text-primary, #e8edf3) !important;
+  }
+  .sidebar .nav-item.active {
+    background: rgba(26,90,225,0.18) !important;
+    color: #5b9fff !important;
+  }
+  .sidebar .nav-item svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    opacity: 0.86 !important;
+    flex: 0 0 18px !important;
+  }
+  .sidebar .sidebar-bottom {
+    margin-top: auto !important;
+    padding: 18px 14px 0 !important;
+    border-top: 1px solid var(--card-border, rgba(26,90,225,0.18)) !important;
+  }
+  .sidebar .theme-btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    margin-top: 10px !important;
+    border-radius: 8px !important;
+    background: rgba(26,90,225,0.08) !important;
+    border: 1px solid rgba(26,90,225,0.18) !important;
+    color: var(--text-secondary, #6b8aad) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+  .sidebar .toggle-track {
+    width: 32px !important;
+    height: 18px !important;
+    border-radius: 9px !important;
+    background: rgba(26,90,225,0.3) !important;
+    position: relative !important;
+    flex: 0 0 32px !important;
+  }
+  .sidebar .toggle-thumb {
+    position: absolute !important;
+    top: 2px !important;
+    left: 2px !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+  }
+</style>
+
+<style id="vrs-dashboard-fit">
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  body {
+    min-height: 100vh !important;
+  }
+  .main {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    padding: clamp(14px, 1.35vw, 22px) !important;
+    display: grid !important;
+    grid-template-rows: auto auto auto minmax(0, 1.35fr) minmax(112px, .85fr) !important;
+    gap: clamp(10px, 1.05vw, 16px) !important;
+  }
+  .topbar,
+  .command-center,
+  .stat-grid,
+  .chart-card,
+  .zip-card {
+    margin-bottom: 0 !important;
+  }
+  .topbar {
+    align-items: center !important;
+    min-height: 48px !important;
+  }
+  .page-title { font-size: clamp(20px, 1.35vw, 24px) !important; }
+  .page-sub { font-size: 12px !important; }
+  .command-center {
+    padding: clamp(12px, 1vw, 16px) clamp(14px, 1.2vw, 18px) !important;
+    min-height: 0 !important;
+  }
+  .command-title { font-size: clamp(16px, 1.15vw, 20px) !important; }
+  .command-copy { font-size: 11px !important; }
+  .command-actions { margin-top: 8px !important; }
+  .command-link { padding: 7px 10px !important; }
+  .command-grid {
+    grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(120px, .7fr)) !important;
+    gap: clamp(10px, .9vw, 14px) !important;
+  }
+  .command-metric { padding: 10px 12px !important; }
+  .command-metric strong { font-size: clamp(18px, 1.35vw, 22px) !important; }
+  .stat-grid {
+    gap: clamp(10px, .9vw, 14px) !important;
+    min-height: 0 !important;
+  }
+  .stat-card {
+    padding: clamp(12px, .95vw, 16px) clamp(14px, 1.05vw, 18px) !important;
+    gap: 8px !important;
+    min-height: 92px !important;
+  }
+  .stat-icon { width: 28px !important; height: 28px !important; }
+  .stat-value { font-size: clamp(24px, 2vw, 31px) !important; }
+  .chart-card,
+  .zip-card {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: clamp(14px, 1vw, 18px) clamp(16px, 1.25vw, 22px) !important;
+  }
+  .chart-card {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+  }
+  .chart-header { margin-bottom: 8px !important; }
+  .pulse-layout {
+    min-height: 0 !important;
+    gap: clamp(16px, 1.4vw, 24px) !important;
+    grid-template-columns: minmax(210px, 300px) minmax(260px, 1fr) !important;
+  }
+  .pulse-rings {
+    grid-template-columns: repeat(2, 112px) !important;
+    gap: 18px !important;
+  }
+  .pulse-ring,
+  .pulse-svg {
+    width: 112px !important;
+    height: 112px !important;
+  }
+  #sparkBars {
+    height: clamp(54px, 7vh, 76px) !important;
+  }
+  .chart-card > div:last-child {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+  }
+  #liveFeed {
+    max-height: 38px !important;
+  }
+  #liveFeed > div:nth-child(n+2) {
+    display: none !important;
+  }
+  .zip-card {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+  }
+  .zip-header { margin-bottom: 8px !important; }
+  #zip-rows {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .zip-row {
+    margin-bottom: 7px !important;
+    gap: 10px !important;
+  }
+  #zip-rows .zip-row:nth-child(n+6) {
+    display: none !important;
+  }
+  .zip-legend {
+    margin-top: 4px !important;
+  }
+  @media (max-height: 820px) {
+    .main {
+      grid-template-rows: auto auto auto minmax(0, 1.2fr) minmax(90px, .7fr) !important;
+      gap: 9px !important;
+      padding: 12px 18px !important;
+    }
+    .command-copy,
+    .command-actions,
+    .zip-legend {
+      display: none !important;
+    }
+    .command-center { padding: 11px 14px !important; }
+    .stat-card { min-height: 76px !important; padding: 10px 13px !important; }
+    .stat-value { font-size: 24px !important; }
+    .pulse-rings { grid-template-columns: repeat(2, 96px) !important; gap: 14px !important; }
+    .pulse-ring, .pulse-svg { width: 96px !important; height: 96px !important; }
+    #sparkBars { height: 48px !important; }
+    .chart-card > div:last-child { display: none !important; }
+    #zip-rows .zip-row:nth-child(n+5) { display: none !important; }
+  }
+</style>
+  <link rel="stylesheet" href="vrs-light-readability.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#5b9fff;">VELTRIQ</div>
+    <div style="font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;line-height:1.45;">Visitor Recovery System</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <button class="nav-item active" onclick="window.location.href='dashboard.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      VRS Overview
+    </button>
+    <button class="nav-item" onclick="window.location.href='intent.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      Recovery Queue
+    </button>
+    <button class="nav-item" onclick="window.location.href='heatmap.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      Recovery Map
+    </button>
+  </div>
+
+ <div class="nav-section">
+  <div class="nav-label">Account</div>
+    <button class="nav-item" onclick="window.location.href='chat.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Support
+    </button><button class="nav-item" onclick="window.location.href='profile.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </button>
+</div>
+
+  <div class="sidebar-bottom">
+    <button class="nav-item" onclick="handleSignOut()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+      <span style="display:flex;align-items:center;gap:8px;">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"></svg>
+        <span id="themeLabel"></span>
+      </span>
+      <div class="toggle-track" id="toggleTrack"><div class="toggle-thumb" id="toggleThumb"></div></div>
+    </button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">VRS Overview</div>
+      <div class="page-sub" id="pageSubtitle">Visitor recovery overview</div>
+    </div>
+    <div class="topbar-controls">
+      <div class="time-toggle">
+        <button class="time-btn active" onclick="setTime(this,'24h')">24h</button>
+        <button class="time-btn" onclick="setTime(this,'48h')">48h</button>
+        <button class="time-btn" onclick="setTime(this,'all')">All Time</button>
+      </div>
+      <input type="date" class="date-input" id="dateFilter" title="Show a specific date" onchange="setDateFilter(this.value)">
+      <div class="data-source" title="Dashboard data is populated by VRS visitors">
+        <span class="data-dot"></span><span id="visitorsourceLabel">VRS Data Feed</span>
+      </div>
+      <button class="exclusive-btn">EXCLUSIVE</button>
+    </div>
+  </div>
+
+  <div class="command-center" aria-label="Recovery command center">
+    <div class="command-grid">
+      <div>
+        <div class="command-eyebrow">Live VRS Command Center</div>
+        <div class="command-title">Recover the visitors most likely to convert next.</div>
+        <div class="command-copy">Prioritize verified visitors, high-activity ZIP zones, and fresh visit activity from one control surface.</div>
+        <div class="command-actions">
+          <button class="command-link" onclick="window.location.href='intent.html'">Open Recovery Queue</button>
+          <button class="command-link" onclick="window.location.href='heatmap.html'">View Recovery Map</button>
+        </div>
+      </div>
+      <div class="command-metric"><span>Ready Records</span><strong id="commandVisitors">-</strong></div>
+      <div class="command-metric"><span>With Contact</span><strong id="commandContacts">-</strong></div>
+      <div class="command-metric"><span>Active ZIPs</span><strong id="commandZones">-</strong></div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-label">Recoverable Visitors</div>
+        <div class="stat-icon" style="background:rgba(26,90,225,0.18);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a5ae1" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+      </div>
+      <div class="stat-value" id="statTotal">-</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-label">Recovery ZIP Zones</div>
+        <div class="stat-icon" style="background:rgba(26,90,225,0.18);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a5ae1" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+      </div>
+      <div class="stat-value" id="statZones" style="font-size:22px;letter-spacing:-0.5px;">-</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-label">Visitor Match Rate</div>
+        <div class="stat-icon" style="background:rgba(167,139,250,0.15);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+      <div class="stat-value" id="statScore">-</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-label">VS Yesterday</div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.15);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+      </div>
+      <div class="stat-value green" id="statTrend">-</div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Live Recovery Pulse</div>
+        <div class="chart-sub">Recoverable visitor activity across ZIP zones</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--text-secondary);">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#1a5ae1;display:inline-block;"></span>Identified</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#11b4dc;display:inline-block;"></span>Anonymous</span>
+      </div>
+    </div>
+    <div class="pulse-layout">
+      <div class="pulse-rings" aria-label="Identified and anonymous visitor split">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+      </div>
+      <div>
+        <div class="pulse-panel-title">Recovered Visitor Volume (Last 30 Days)</div>
+        <div id="sparkBars" style="display:flex;align-items:flex-end;gap:3px;height:80px;"></div>
+        <div id="sparkLabels" style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;border-top:1px solid var(--card-border);padding-top:14px;">
+      <div class="pulse-feed-title">
+        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;animation:blink 1.4s infinite;"></span>Live Recovery Feed
+      </div>
+      <div id="liveFeed" style="display:flex;flex-direction:column;gap:7px;max-height:72px;overflow:hidden;"></div>
+    </div>
+  </div>
+
+  <div class="zip-card">
+    <div class="zip-header">
+      <div class="zip-title">Top Recovery ZIPs</div>
+      <div class="zip-sub" id="zipSub">Most recoverable in the last 24h</div>
+    </div>
+    <div id="zip-rows"></div>
+    <div class="zip-legend">
+      <span><span style="background:#1a5ae1;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;"></span>Identified</span>
+      <span><span style="background:#11b4dc;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;"></span>Anonymous</span>
+    </div>
+  </div>
+</main>
+<script src="data/vrs-visitors.js"></script>
+<script src="vrs-data.js"></script>
+<script>
+// Visitor recovery scoring engine
+function hasContactValue(value) {
+    const cleaned = String(value ?? "").trim().toLowerCase();
+    return cleaned !== "" && cleaned !== "null" && cleaned !== "undefined" && cleaned !== "nan";
+}
+
+function rangeHighValue(value) {
+    const text = String(value ?? "").toLowerCase();
+    if (!hasContactValue(text)) return 0;
+
+    if (text.includes("million") || text.includes("mm")) {
+        const nums = text.match(/\d+(?:\.\d+)?/g) || [];
+        return nums.length ? Math.max(...nums.map(Number)) * 1000000 : 1000000;
+    }
+
+    const nums = text.match(/\d[\d,]*/g) || [];
+    return nums.length ? Math.max(...nums.map(n => Number(n.replace(/,/g, "")))) : 0;
+}
+
+function incomePoints(value) {
+    const high = rangeHighValue(value);
+    if (high >= 200000) return 7;
+    if (high >= 150000) return 6;
+    if (high >= 100000) return 5;
+    if (high >= 75000) return 4;
+    if (high >= 45000) return 3;
+    if (high > 0) return 1;
+    return 0;
+}
+
+function netWorthPoints(value) {
+    const high = rangeHighValue(value);
+    if (high >= 1000000) return 7;
+    if (high >= 500000) return 5;
+    if (high >= 250000) return 4;
+    if (high >= 100000) return 3;
+    if (high > 0) return 1;
+    return 0;
+}
+
+function calculateIntentScore(row) {
+    const income = row.INCOME_RANGE || row.INCOME || row.ESTIMATED_HOUSEHOLD_INCOME;
+    const netWorth = row.NET_WORTH || row.ESTIMATED_NET_WORTH;
+    const phone = row.SKIPTRACE_WIRELESS_NUMBERS || row.phone;
+    const email = row.PERSONAL_VERIFIED_EMAIL || row.PERSONAL_VERIFIED_EMAILS || row.email;
+
+    const score =
+        75 +
+        incomePoints(income) +
+        netWorthPoints(netWorth) +
+        (hasContactValue(phone) ? 8 : 0) +
+        (hasContactValue(email) ? 2 : 0);
+
+    return Math.max(75, Math.min(score, 99));
+}
+
+
+
+let currentMetro = 'all_visitors';
+let currentTime  = '24h';
+let currentDate  = '';
+let allRepair    = [];
+let allReplace   = [];
+let usingPreviewData = false;
+
+function visitorPreviewRecords() {
+  const now = Date.now();
+  const zones = [
+    { zip: '44333', identified: 18, anonymous: 7 },
+    { zip: '44720', identified: 16, anonymous: 5 },
+    { zip: '44313', identified: 14, anonymous: 6 },
+    { zip: '44221', identified: 12, anonymous: 4 },
+    { zip: '44708', identified: 10, anonymous: 5 },
+    { zip: '44224', identified: 8, anonymous: 3 }
+  ];
+  const rows = [];
+  let index = 0;
+  const pushRow = (zip, identified, hoursAgo, scoreSeed) => {
+    const visitedAt = new Date(now - hoursAgo * 3600000).toISOString();
+    rows.push({
+      id: 'vrs-preview-' + index,
+      zip,
+      identified,
+      visited_at: visitedAt,
+      ingested_at: visitedAt,
+      skiptrace_match_score: identified ? Math.min(99, 82 + (scoreSeed % 16)) : Math.min(91, 68 + (scoreSeed % 18)),
+      source: 'VRS Data',
+      visit_count: 1 + (scoreSeed % 3)
+    });
+    index += 1;
+  };
+
+  zones.forEach((zone, zoneIndex) => {
+    for (let i = 0; i < zone.identified; i += 1) pushRow(zone.zip, true, 0.35 + ((index * 2.7 + zoneIndex) % 23), index + zoneIndex);
+    for (let i = 0; i < zone.anonymous; i += 1) pushRow(zone.zip, false, 0.75 + ((index * 3.1 + zoneIndex) % 23), index + zoneIndex);
+  });
+
+  for (let day = 1; day < 30; day += 1) {
+    const dailyVolume = 4 + ((day * 7) % 9);
+    for (let i = 0; i < dailyVolume; i += 1) {
+      const zone = zones[(day + i) % zones.length];
+      pushRow(zone.zip, (i + day) % 4 !== 0, (day * 24) + 2 + ((i * 5) % 18), i + day);
+    }
+  }
+
+  return rows;
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('veltriq_theme', theme);
+  const isDark = theme === 'dark';
+  const track = document.getElementById('toggleTrack');
+  const thumb = document.getElementById('toggleThumb');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (isDark) {
+    track.classList.remove('on'); thumb.classList.remove('on');
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    label.textContent = 'Dark Mode';
+  } else {
+    track.classList.add('on'); thumb.classList.add('on');
+    icon.innerHTML = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    label.textContent = 'Light Mode';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+function handleSignOut() {
+  window.location.href = 'index.html';
+}
+
+function setTime(btn, period) {
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTime = period;
+  currentDate = '';
+  const dateInput = document.getElementById('dateFilter');
+  if (dateInput) dateInput.value = '';
+  renderAll();
+}
+
+function setDateFilter(value) {
+  currentDate = value || '';
+  if (!currentDate) {
+    const firstBtn = document.querySelector('.time-btn');
+    if (firstBtn) setTime(firstBtn, '24h');
+    return;
+  }
+  currentTime = 'date';
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  renderAll();
+}
+
+function easternDateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+function filterBySelectedDate(rows) {
+  return rows.filter(r => easternDateKey(r.ingested_at) === currentDate);
+}
+
+// VRS visitor data powers the dashboard.
+async function loadData() {
+  document.getElementById('pageSubtitle').textContent = 'Visitor Recovery System overview | VRS data feed';
+  const visitors = await VRS.loadVisitors(null, currentMetro);
+  usingPreviewData = visitors.length === 0;
+  const rows = usingPreviewData ? visitorPreviewRecords() : visitors;
+  const sourceLabel = document.getElementById('visitorsourceLabel');
+  if (sourceLabel) sourceLabel.textContent = usingPreviewData ? 'VRS Preview' : 'VRS Data Feed';
+  if (usingPreviewData) {
+    document.getElementById('pageSubtitle').textContent = 'Visitor Recovery System overview | VRS preview until live events arrive';
+  }
+  allRepair = rows.filter(r => r.identified);
+  allReplace = rows.filter(r => !r.identified);
+  renderAll();
+}
+
+function renderAll() {
+  const isDateFilter = Boolean(currentDate);
+  const cutoff = currentTime === 'all' || isDateFilter ? new Date(0) : new Date(Date.now() - (currentTime === '24h' ? 24 : 48) * 3600000);
+	const repair = isDateFilter ? filterBySelectedDate(allRepair) : allRepair.filter(r => new Date(r.ingested_at) >= cutoff);
+  const replace = isDateFilter ? filterBySelectedDate(allReplace) : allReplace.filter(r => new Date(r.ingested_at) >= cutoff);
+  
+  const total = repair.length + replace.length;
+  const zones = new Set([...repair, ...replace].map(r => r.zip)).size;
+
+  document.getElementById('statTotal').textContent = total.toLocaleString();
+  document.getElementById('statZones').textContent = zones + ' Zones';
+  
+  const identificationRate = total ? Math.round((repair.length / total) * 100) : 0;
+  document.getElementById('statScore').innerHTML = `<span style="color:#22c55e">${identificationRate}</span><span class="score-suffix">%</span>`;
+
+ // ── NEW TREND LOGIC: Dynamic Comparison ──
+  const now = Date.now();
+  let currentTotal = total;
+  let previousTotal = 0;
+  let trendLabel = 'VS Yesterday';
+
+  if (currentTime !== 'all' && !isDateFilter) {
+    const hours = currentTime === '24h' ? 24 : 48;
+    const msPeriod = hours * 3600000;
+    const prevCutoff = new Date(now - (msPeriod * 2)); 
+    
+    // Count how many leads fell into the previous timeframe
+    const getOldCount = arr => arr.filter(r => {
+        const d = new Date(r.ingested_at).getTime();
+        return d >= prevCutoff.getTime() && d < cutoff.getTime();
+    }).length;
+
+    previousTotal = getOldCount(allRepair) + getOldCount(allReplace);
+    trendLabel = currentTime === '48h' ? 'VS Prev 48h' : 'VS Yesterday';
+  }
+
+  // Calculate the actual percentage change
+  let trendPct = 0;
+  if (previousTotal === 0 && currentTotal > 0) trendPct = 100;
+  else if (previousTotal > 0) trendPct = Math.round(((currentTotal - previousTotal) / previousTotal) * 100);
+
+  // Grab the HTML elements so we can dynamically style them
+  const trendCard = document.getElementById('statTrend').parentElement;
+  const labelEl = trendCard.querySelector('.stat-label');
+  const iconWrap = trendCard.querySelector('.stat-icon');
+  const iconSvg = iconWrap.querySelector('svg');
+  const statTrendEl = document.getElementById('statTrend');
+
+  labelEl.textContent = isDateFilter ? 'Selected Date' : currentTime === 'all' ? 'All Time' : trendLabel;
+
+  if (currentTime === 'all' || isDateFilter) {
+    // Neutral state for "All Time"
+    statTrendEl.innerHTML = `-`;
+    statTrendEl.style.color = 'var(--text-muted)';
+    iconWrap.style.background = 'rgba(255,255,255,0.05)';
+    iconSvg.style.stroke = 'var(--text-muted)';
+    iconSvg.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>';
+  } else if (trendPct >= 0) {
+    // Upward Trend (Green)
+    statTrendEl.innerHTML = `+${trendPct}% <span class="trend-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>`;
+    statTrendEl.style.color = 'var(--accent-green)';
+    iconWrap.style.background = 'rgba(34,197,94,0.15)';
+    iconSvg.style.stroke = 'var(--accent-green)';
+    iconSvg.innerHTML = '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>';
+  } else {
+    // Downward Trend (Red)
+    statTrendEl.innerHTML = `${trendPct}% <span class="trend-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></span>`;
+    statTrendEl.style.color = 'var(--accent-red)';
+    iconWrap.style.background = 'rgba(239,68,68,0.15)';
+    iconSvg.style.stroke = 'var(--accent-red)';
+    iconSvg.innerHTML = '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>';
+  }
+  renderRings(repair.length, replace.length);
+  renderSparkline(allRepair, allReplace);
+  renderZips(repair, replace);
+  renderFeed(repair, replace);
+  document.getElementById('zipSub').textContent = 'Most active in ' + (isDateFilter ? currentDate : currentTime === 'all' ? 'all time' : 'the last ' + currentTime);
+}
+
+function renderRings(rep, repl) {
+  const total = rep + repl || 1;
+  const rings = document.querySelectorAll('.pulse-ring');
+  [[rep,'#1a5ae1','Identified'],[repl,'#11b4dc','Anonymous']].forEach(([v,c,l], i) => {
+    if (!rings[i]) return;
+    const pct = Math.round(v / total * 100);
+    const circ = 2 * Math.PI * 45;
+    rings[i].innerHTML = `
+      <svg class="pulse-svg" viewBox="0 0 112 112" role="img" aria-label="${l}: ${v}">
+        <circle class="pulse-track" cx="56" cy="56" r="45" fill="none" stroke-width="9"/>
+        <circle cx="56" cy="56" r="45" fill="none" stroke="${c}" stroke-width="9" stroke-dasharray="${(pct/100)*circ} ${circ}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round"/>
+        <text class="pulse-value" x="56" y="51" text-anchor="middle">${v}</text>
+        <text class="pulse-label" x="56" y="69" text-anchor="middle">${l.toUpperCase()}</text>
+      </svg>`;
+  });
+}
+
+function renderSparkline(rep, repl) {
+  // Create exactly 30 buckets (1 for each of the last 30 days)
+  const buckets = Array(30).fill(0); 
+  const now = Date.now();
+  
+  // Sort the leads into their respective 24-hour rolling windows
+  [...rep, ...repl].forEach(r => { 
+    const diffMs = now - new Date(r.ingested_at).getTime();
+    const diffDays = Math.floor(diffMs / 86400000); // 86,400,000 ms in exactly one day
+    if (diffDays >= 0 && diffDays < 30) {
+      buckets[29 - diffDays]++; // Place in correct bucket (index 29 is Today, index 0 is 30 days ago)
+    }
+  });
+
+  const maxV = Math.max(...buckets, 1); 
+  const el = document.getElementById('sparkBars'); 
+  el.innerHTML = '';
+  
+  // Render the 30 visual blocks
+  buckets.forEach((v, i) => { 
+    // Calculate the exact date for this specific block
+    const barDate = new Date(now - ((29 - i) * 86400000));
+    const dateStr = barDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
+    const bar = document.createElement('div'); 
+    
+    // Add a native tooltip so the user can hover to see the exact Date & Volume!
+    bar.title = `${dateStr} : ${v} visitors`;
+    
+    // Build the visual bar (highlighting the most recent day in the primary gradient)
+    bar.style.cssText = `flex:1;height:${Math.round((v/maxV)*72)+4}px;border-radius:3px 3px 0 0;background:${i === 29 ? 'linear-gradient(180deg,#1a5ae1,#11b4dc)' : 'rgba(26,90,225,0.25)'};transition:all 0.2s;cursor:pointer;`; 
+    
+    // Add a smooth hover effect
+    bar.onmouseover = () => bar.style.opacity = '0.6';
+    bar.onmouseout = () => bar.style.opacity = '1';
+
+    el.appendChild(bar); 
+  });
+
+  // Update the 3 anchor dates at the bottom of the chart
+  const labelsEl = document.getElementById('sparkLabels');
+  if (labelsEl) {
+    const d30 = new Date(now - (29 * 86400000)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const d15 = new Date(now - (14 * 86400000)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    labelsEl.innerHTML = `<span>${d30}</span><span>${d15}</span><span>Today</span>`;
+  }
+}
+
+function renderZips(rep, repl) {
+  const map = {};
+  rep.forEach(r => { if (!map[r.zip]) map[r.zip] = { zip:r.zip, rep:0, repl:0 }; map[r.zip].rep++; });
+  repl.forEach(r => { if (!map[r.zip]) map[r.zip] = { zip:r.zip, rep:0, repl:0 }; map[r.zip].repl++; });
+  const sorted = Object.values(map).sort((a,b)=>(b.rep+b.repl)-(a.rep+a.repl)).slice(0, 5);
+  const container = document.getElementById('zip-rows'); container.innerHTML = sorted.length ? '' : '<div style="color:#6b8aad;font-size:12px;padding:10px 0;">Awaiting VRS activity for this view</div>';
+  const mR = Math.max(...sorted.map(z=>z.rep), 1), mP = Math.max(...sorted.map(z=>z.repl), 1);
+  sorted.forEach((z, i) => { container.innerHTML += `<div class="zip-row"><div class="zip-rank">${i+1}</div><div class="zip-code">${z.zip}</div><div class="bar-wrap"><div class="bar-track"><div class="bar-fill bar-repair" style="width:${Math.round(z.rep/mR*100)}%"></div></div><div class="bar-track"><div class="bar-fill bar-replace" style="width:${Math.round(z.repl/mP*100)}%"></div></div></div><div class="zip-scores"><span class="score-r">${z.rep}</span><span class="score-p">${z.repl}</span></div></div>`; });
+}
+
+function renderFeed(rep, repl) {
+  const el = document.getElementById('liveFeed'); el.innerHTML = '';
+  
+  // 1. Sort both lists individually first
+  const topRepair = [...rep].sort((a,b)=>new Date(b.ingested_at)-new Date(a.ingested_at)).map(r=>({...r,t:'Identified',c:'#1a5ae1'}));
+  const topReplace = [...repl].sort((a,b)=>new Date(b.ingested_at)-new Date(a.ingested_at)).map(r=>({...r,t:'Anonymous',c:'#11b4dc'}));
+  
+ // 2. Guarantee exactly 1 Repair and 1 Replace
+  const mixedFeed = [];
+  if (topRepair.length > 0) mixedFeed.push(topRepair[0]);
+  if (topReplace.length > 0) mixedFeed.push(topReplace[0]);
+  
+  // 3. Sort those 2 so the absolute newest of the two is always on top
+  mixedFeed.sort((a,b)=>new Date(b.ingested_at)-new Date(a.ingested_at));
+
+  // 4. Render them to the screen (Keeping your exact UI design!)
+  mixedFeed.forEach(d => { 
+      const s = d.skiptrace_match_score || 80; 
+      el.innerHTML += `<div style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:7px;background:rgba(26,90,225,0.06);border:1px solid rgba(26,90,225,0.1);animation:slideIn 0.3s ease both;"><span style="width:7px;height:7px;border-radius:50%;background:${d.c};"></span><span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;min-width:46px;">${d.zip}</span><span style="font-size:11px;font-weight:600;color:${d.c};min-width:54px;">${d.t}</span><div style="flex:1;background:rgba(255,255,255,0.05);height:4px;border-radius:2px;overflow:hidden;"><div style="width:${s}%;height:100%;background:${d.c};"></div></div><span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:${d.c};min-width:24px;">${s}</span></div>`; 
+  });
+}
+
+window.addEventListener('load', () => { applyTheme(localStorage.getItem('veltriq_theme') || 'dark'); loadData(); });
+</script>
+</body>
+</html>
+
