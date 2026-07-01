@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
   const locationId = process.env.GHL_LOCATION_ID;
   if (!token || !locationId) {
     return res.status(503).json({
-      error: 'GHL sync is not configured. Add GHL_PRIVATE_INTEGRATION_TOKEN and GHL_LOCATION_ID in Vercel.'
+      error: 'Contact sync is not configured. Add the required integration credentials in Vercel.'
     });
   }
 
