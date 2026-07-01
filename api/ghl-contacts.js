@@ -27,7 +27,7 @@ function toGhlContact(row, locationId) {
     postalCode: clean(row.zip || row.postalCode, 30),
     country: clean(row.country || 'US', 2).toUpperCase(),
     source: clean(row.source || 'VELTRIQ VRS', 100),
-    tags: ['VRS Lead', 'Audience Labs']
+    tags: ['vrs']
   };
 }
 
