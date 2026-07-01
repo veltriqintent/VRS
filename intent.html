@@ -660,7 +660,7 @@
       </div>
       <div class="table-actions">
         <button class="action-btn primary" onclick="exportVisitors()">Download CSV</button>
-        <button class="action-btn ghl-btn" id="ghlSyncBtn" onclick="sendFilteredToGhl()">Send to GHL</button>
+        <button class="action-btn ghl-btn" id="ghlSyncBtn" onclick="sendFilteredToGhl()">Add to Contacts</button>
       </div>
     </div>
     <div class="ghl-status" id="ghlSyncStatus" role="status" aria-live="polite"></div>
@@ -997,7 +997,7 @@ async function sendFilteredToGhl() {
 
   button.disabled = true;
   button.textContent = 'Sending...';
-  setGhlSyncStatus('working', `Sending ${eligible.length.toLocaleString()} contact${eligible.length === 1 ? '' : 's'} to GHL...`);
+  setGhlSyncStatus('working', `Adding ${eligible.length.toLocaleString()} contact${eligible.length === 1 ? '' : 's'}...`);
 
   try {
     const totals = { synced: 0, created: 0, updated: 0, skipped: skippedLocally, failed: 0, errors: [] };
@@ -1015,16 +1015,16 @@ async function sendFilteredToGhl() {
       totals.skipped += Number(result.skipped || 0);
       totals.failed += Number(result.failed || 0);
       if (Array.isArray(result.errors)) totals.errors.push(...result.errors);
-      setGhlSyncStatus('working', `Sent ${Math.min(index + 50, eligible.length).toLocaleString()} of ${eligible.length.toLocaleString()} contacts...`);
+      setGhlSyncStatus('working', `Added ${Math.min(index + 50, eligible.length).toLocaleString()} of ${eligible.length.toLocaleString()} contacts...`);
     }
 
     const summary = `${totals.synced.toLocaleString()} synced (${totals.created.toLocaleString()} created, ${totals.updated.toLocaleString()} updated), ${totals.skipped.toLocaleString()} skipped`;
     setGhlSyncStatus(totals.failed ? 'error' : 'success', totals.failed ? `${summary}, ${totals.failed.toLocaleString()} failed.` : `${summary}.`);
   } catch (error) {
-    setGhlSyncStatus('error', error.message || 'Unable to send contacts to GHL.');
+    setGhlSyncStatus('error', error.message || 'Unable to add contacts.');
   } finally {
     button.disabled = false;
-    button.textContent = 'Send to GHL';
+    button.textContent = 'Add to Contacts';
   }
 }
 
