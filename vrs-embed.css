@@ -1,0 +1,29 @@
+/* GHL provides the outer navigation, so VRS pages render as light-only content. */
+:root {
+  color-scheme: light !important;
+  --bg: #f0f4f8 !important;
+  --sidebar-bg: #e8edf5 !important;
+  --card-bg: #ffffff !important;
+  --card-border: rgba(26, 90, 225, 0.15) !important;
+  --text-primary: #0f1e33 !important;
+  --text-secondary: #4a6080 !important;
+  --text-muted: #8fa3bb !important;
+  --sidebar-width: 0px !important;
+}
+
+html,
+body {
+  background: #f0f4f8 !important;
+  color: var(--text-primary) !important;
+}
+
+.sidebar { display: none !important; }
+
+.main {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
+.theme-btn,
+#themeBtn { display: none !important; }

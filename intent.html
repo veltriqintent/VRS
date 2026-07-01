@@ -517,6 +517,8 @@
 </style>
   <link rel="stylesheet" href="vrs-light-readability.css">
 </head>
+<script src="vrs-embed.js"></script>
+<link rel="stylesheet" href="vrs-embed.css">
 <body>
 
 <aside class="sidebar">
@@ -656,13 +658,12 @@
           <th>Contact</th>
           <th>Address</th>
           <th>Zip</th>
-          <th>Source / Page</th>
           <th>Visits</th>
           <th>Visited At</th>
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr><td colspan="7" class="table-empty"><div class="spinner"></div><br/>Fetching visitors...</td></tr>
+        <tr><td colspan="6" class="table-empty"><div class="spinner"></div><br/>Fetching visitors...</td></tr>
       </tbody>
     </table>
     <div class="pagination" id="pagination" style="display:none;">
@@ -814,7 +815,7 @@ let filteredData = [];
 async function loadData() {
   document.getElementById('pageSubtitle').textContent = 'Recoverable visitor records | VRS data';
   const tbody = document.getElementById('tableBody');
-  if(tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><div class="spinner"></div><br/>Loading VRS visitors...</td></tr>';
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="table-empty"><div class="spinner"></div><br/>Loading VRS visitors...</td></tr>';
   allVisitors = await VRS.loadVisitors(null, currentMetro);
   populateFilterOptions();
   applyFilters();
@@ -973,7 +974,7 @@ function renderTable() {
   const total = filteredData.length;
 
   if (total === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">
+    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
@@ -1053,10 +1054,6 @@ function renderTable() {
       </td>
       <td>
         <span class="zip-chip">${safeZip}</span>
-      </td>
-      <td>
-        <div style="font-size:12px;font-weight:600;color:var(--text-primary);">${escapeHtml(r.source || 'VRS Data')}</div>
-        <div style="font-size:10px;color:var(--text-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(r.page_url)}">${escapeHtml(r.page_title || r.page_url || 'Page unavailable')}</div>
       </td>
       <td>
         <span class="zip-chip">${Number(r.visit_count || 1).toLocaleString()}</span>
