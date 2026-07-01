@@ -232,6 +232,15 @@
     border-radius:7px; color:var(--text-primary); font:inherit; font-size:12px; padding:7px 9px; outline:none;
   }
   .filter-actions { display:flex; align-items:flex-end; gap:8px; }
+  .table-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .ghl-btn { background:#16a34a !important; border-color:#16a34a !important; color:#fff !important; }
+  .ghl-btn:hover { background:#15803d !important; border-color:#15803d !important; }
+  .ghl-btn:disabled { cursor:wait; opacity:.65; transform:none !important; }
+  .ghl-status { display:none; margin:0 0 12px; padding:10px 12px; border-radius:8px; font-size:12px; font-weight:600; }
+  .ghl-status.show { display:block; }
+  .ghl-status.working { color:#1d4ed8; background:#dbeafe; border:1px solid #bfdbfe; }
+  .ghl-status.success { color:#166534; background:#dcfce7; border:1px solid #bbf7d0; }
+  .ghl-status.error { color:#991b1b; background:#fee2e2; border:1px solid #fecaca; }
   .action-btn {
     border:1px solid var(--card-border); background:rgba(26,90,225,.1); color:var(--text-primary);
     border-radius:8px; padding:8px 12px; font:inherit; font-size:11px; font-weight:700; cursor:pointer;
@@ -649,8 +658,12 @@
         <div class="table-title">Recovery Queue</div>
         <div class="table-count" id="tableCount">0 visitors</div>
       </div>
-      <button class="action-btn primary" onclick="exportVisitors()">Download CSV</button>
+      <div class="table-actions">
+        <button class="action-btn primary" onclick="exportVisitors()">Download CSV</button>
+        <button class="action-btn ghl-btn" id="ghlSyncBtn" onclick="sendFilteredToGhl()">Send to GHL</button>
+      </div>
     </div>
+    <div class="ghl-status" id="ghlSyncStatus" role="status" aria-live="polite"></div>
    <table id="dataTable">
       <thead>
         <tr>
@@ -965,6 +978,54 @@ function resetFilters() {
 
 function exportVisitors() {
   VRS.downloadCsv(filteredData, `veltriq-vrs-visitors-${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function setGhlSyncStatus(type, message) {
+  const status = document.getElementById('ghlSyncStatus');
+  status.className = `ghl-status show ${type}`;
+  status.textContent = message;
+}
+
+async function sendFilteredToGhl() {
+  const button = document.getElementById('ghlSyncBtn');
+  const eligible = filteredData.filter(row => String(row.email || '').trim() || String(row.phone || '').trim());
+  const skippedLocally = filteredData.length - eligible.length;
+  if (!eligible.length) {
+    setGhlSyncStatus('error', 'No filtered visitors have an email address or phone number to sync.');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Sending...';
+  setGhlSyncStatus('working', `Sending ${eligible.length.toLocaleString()} contact${eligible.length === 1 ? '' : 's'} to GHL...`);
+
+  try {
+    const totals = { synced: 0, created: 0, updated: 0, skipped: skippedLocally, failed: 0, errors: [] };
+    for (let index = 0; index < eligible.length; index += 50) {
+      const response = await fetch('/api/ghl-contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ contacts: eligible.slice(index, index + 50) })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok && response.status !== 207) throw new Error(result.error || `Sync failed (${response.status})`);
+      totals.synced += Number(result.synced || 0);
+      totals.created += Number(result.created || 0);
+      totals.updated += Number(result.updated || 0);
+      totals.skipped += Number(result.skipped || 0);
+      totals.failed += Number(result.failed || 0);
+      if (Array.isArray(result.errors)) totals.errors.push(...result.errors);
+      setGhlSyncStatus('working', `Sent ${Math.min(index + 50, eligible.length).toLocaleString()} of ${eligible.length.toLocaleString()} contacts...`);
+    }
+
+    const summary = `${totals.synced.toLocaleString()} synced (${totals.created.toLocaleString()} created, ${totals.updated.toLocaleString()} updated), ${totals.skipped.toLocaleString()} skipped`;
+    setGhlSyncStatus(totals.failed ? 'error' : 'success', totals.failed ? `${summary}, ${totals.failed.toLocaleString()} failed.` : `${summary}.`);
+  } catch (error) {
+    setGhlSyncStatus('error', error.message || 'Unable to send contacts to GHL.');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Send to GHL';
+  }
 }
 
 function renderTable() {
