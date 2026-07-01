@@ -772,7 +772,7 @@ let currentDate = '';
 
 // -- MAP INIT --
 const map = L.map('map', { center: [39.8283, -98.5795], zoom: 4, zoomControl: false, attributionControl: false });
-  L.control.zoom({ position: 'topright' }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, subdomains: 'abcd' }).addTo(map);
 
 let heatLayer = null;
@@ -1036,6 +1036,11 @@ function updatePanel(leads, zips) {
   
   document.getElementById('splitR').style.width = rPct + '%';
   document.getElementById('splitP').style.width = pPct + '%';
+
+  const focusZip = document.getElementById('focusZip');
+  if (focusZip) {
+    focusZip.textContent = zips.length ? zips[0].zip : 'No activity';
+  }
   
   renderZipRanks(zips);
   renderFeed(leads);
